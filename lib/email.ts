@@ -1,7 +1,5 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY!)
-
 /**
  * Send the completed headshots to the customer's email.
  * imageUrls: array of Replicate CDN URLs for the generated headshots.
@@ -64,6 +62,7 @@ export async function sendHeadshotsEmail(
     </html>
   `
 
+  const resend = new Resend(process.env.RESEND_API_KEY!)
   await resend.emails.send({
     from: 'SnapShot AI <hello@snapshotai.com>',
     to: toEmail,

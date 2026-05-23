@@ -3,14 +3,13 @@ import Stripe from 'stripe'
 import { generateHeadshots } from '@/lib/replicate'
 import { sendHeadshotsEmail } from '@/lib/email'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
-})
-
 export const runtime = 'nodejs'
 export const maxDuration = 300 // 5 min — AI generation takes time
 
 export async function POST(req: NextRequest) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: '2023-10-16',
+  })
   const body = await req.text()
   const sig = req.headers.get('stripe-signature')!
 

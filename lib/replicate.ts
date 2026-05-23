@@ -1,10 +1,5 @@
 import Replicate from 'replicate'
 
-// Initialize Replicate client
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN!,
-})
-
 // PhotoMaker model — preserves face likeness while generating headshots
 const PHOTOMAKER_VERSION =
   'ddfc2b08d209f9fa8c1eca692712918bd449f695d785824b1fe844f1af4041a8'
@@ -50,6 +45,7 @@ export async function uploadFileToReplicate(
  * Returns an array of image URLs.
  */
 export async function generateHeadshots(imageUrls: string[]): Promise<string[]> {
+  const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
   const primaryImage = imageUrls[0] // Use first image as main face reference
 
   const allResults: string[] = []
