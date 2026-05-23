@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true })
   }
 
-  const session = event.data.object as Stripe.CheckoutSession
+  const session = event.data.object as Stripe.Checkout.Session
   const metadata = session.metadata || {}
   const email = metadata.email
 
