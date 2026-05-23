@@ -42,7 +42,7 @@ function SuccessContent() {
         <h2 className="font-display text-2xl text-cream mb-4">While you wait...</h2>
         <ul className="space-y-3">
           {[
-            'Check your spam/junk folder if you don't see the email',
+            "Check your spam/junk folder if you don't see the email",
             'Add hello@snapshotai.com to your contacts so it doesn't get filtered',
             'Your headshots will be delivered as high-resolution downloads',
             'You can use them on LinkedIn, resumes, websites — forever',
