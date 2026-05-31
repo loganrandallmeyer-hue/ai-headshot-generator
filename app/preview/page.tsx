@@ -1,9 +1,7 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
-import { useState, useEffect, useRef } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect, useRef, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 const TIERS = [
@@ -34,7 +32,7 @@ const TIERS = [
   },
 ]
 
-export default function PreviewPage() {
+function PreviewContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -270,5 +268,17 @@ export default function PreviewPage() {
 
       </div>
     </main>
+  )
+}
+
+export default function PreviewPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-obsidian text-cream flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+      </main>
+    }>
+      <PreviewContent />
+    </Suspense>
   )
 }
