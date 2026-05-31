@@ -43,9 +43,31 @@ export default function UploadPage() {
     setError('')
 
     try {
+      // Compress each image client-side to keep payload under Vercel's 4.5MB limit
+      const compressImage = (file: File): Promise<File> =>
+        new Promise((resolve) => {
+          const img = new window.Image()
+          img.onload = () => {
+            const canvas = document.createElement('canvas')
+            const MAX = 1024
+            const scale = Math.min(MAX / img.width, MAX / img.height, 1)
+            canvas.width = Math.round(img.width * scale)
+            canvas.height = Math.round(img.height * scale)
+            canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+            canvas.toBlob(
+              (blob) => resolve(new File([blob!], file.name, { type: 'image/jpeg' })),
+              'image/jpeg',
+              0.82
+            )
+          }
+          img.src = URL.createObjectURL(file)
+        })
+
+      const compressed = await Promise.all(files.map(compressImage))
+
       // 1. Upload images + generate watermarked preview
       const formData = new FormData()
-      files.forEach((file) => formData.append('files', file))
+      compressed.forEach((file) => formData.append('files', file))
       formData.append('email', email)
 
       const uploadRes = await fetch('/api/upload', {
