@@ -9,25 +9,44 @@ export default function UploadPage() {
   const [files, setFiles] = useState<File[]>([])
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [statusMsg, setStatusMsg] = useState('')
   const [error, setError] = useState('')
 
   const onDrop = useCallback((accepted: File[]) => {
-    setFiles((prev) => {
-      const combined = [...prev, ...accepted]
-      return combined.slice(0, 20) // max 20 photos
-    })
+    setFiles((prev) => [...prev, ...accepted].slice(0, 20))
     setError('')
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { 'image/*': ['.jpg', '.jpeg', '.png', '.webp'] },
-    maxSize: 10 * 1024 * 1024, // 10MB per file
+    maxSize: 20 * 1024 * 1024,
   })
 
   const removeFile = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index))
   }
+
+  const compressFile = (file: File): Promise<File> =>
+    new Promise((resolve) => {
+      const img = new window.Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const MAX = 1200
+        const scale = Math.min(MAX / img.width, MAX / img.height, 1)
+        canvas.width = Math.round(img.width * scale)
+        canvas.height = Math.round(img.height * scale)
+        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+        canvas.toBlob(
+          (blob) => resolve(new File([blob!], file.name, { type: 'image/jpeg' })),
+          'image/jpeg',
+          0.85
+        )
+        URL.revokeObjectURL(img.src)
+      }
+      img.src = URL.createObjectURL(file)
+    })
 
   const handleSubmit = async () => {
     if (files.length < 10) {
@@ -41,47 +60,38 @@ export default function UploadPage() {
 
     setLoading(true)
     setError('')
+    setUploadProgress(0)
 
     try {
-      // Compress each image client-side to keep payload under Vercel's 4.5MB limit
-      const compressImage = (file: File): Promise<File> =>
-        new Promise((resolve) => {
-          const img = new window.Image()
-          img.onload = () => {
-            const canvas = document.createElement('canvas')
-            const MAX = 1024
-            const scale = Math.min(MAX / img.width, MAX / img.height, 1)
-            canvas.width = Math.round(img.width * scale)
-            canvas.height = Math.round(img.height * scale)
-            canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
-            canvas.toBlob(
-              (blob) => resolve(new File([blob!], file.name, { type: 'image/jpeg' })),
-              'image/jpeg',
-              0.82
-            )
-          }
-          img.src = URL.createObjectURL(file)
-        })
+      const fileUrls: string[] = []
 
-      const compressed = await Promise.all(files.map(compressImage))
+      for (let i = 0; i < files.length; i++) {
+        setStatusMsg(`Uploading photo ${i + 1} of ${files.length}...`)
+        const compressed = await compressFile(files[i])
+        const fd = new FormData()
+        fd.append('file', compressed)
 
-      // 1. Upload images + generate watermarked preview
-      const formData = new FormData()
-      compressed.forEach((file) => formData.append('files', file))
-      formData.append('email', email)
+        const res = await fetch('/api/upload', { method: 'POST', body: fd })
+        if (!res.ok) throw new Error('Upload failed. Please try again.')
+        const { url } = await res.json()
+        fileUrls.push(url)
+        setUploadProgress(Math.round(((i + 1) / files.length) * 70))
+      }
 
-      const uploadRes = await fetch('/api/upload', {
+      setStatusMsg('Generating your preview...')
+      setUploadProgress(75)
+
+      const previewRes = await fetch('/api/generate-preview', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileUrls, email }),
       })
+      if (!previewRes.ok) throw new Error('Preview generation failed. Please try again.')
+      const { previewUrl, sessionId } = await previewRes.json()
 
-      if (!uploadRes.ok) throw new Error('Upload failed. Please try again.')
-      const { fileUrls, sessionId, previewUrl } = await uploadRes.json()
-
-      // 2. Store file URLs in sessionStorage so the preview page can access them
+      setUploadProgress(100)
       sessionStorage.setItem(`snapshot_urls_${sessionId}`, JSON.stringify(fileUrls))
 
-      // 3. Redirect to preview page (tier selection + watermarked preview)
       const params = new URLSearchParams({
         session_id: sessionId,
         email,
@@ -91,13 +101,13 @@ export default function UploadPage() {
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
       setLoading(false)
+      setUploadProgress(0)
+      setStatusMsg('')
     }
   }
 
   return (
     <main className="min-h-screen bg-obsidian text-cream">
-
-      {/* NAV */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-border">
         <Link href="/" className="font-display text-2xl font-semibold">
           Snap<span className="text-gold">Shot</span> AI
@@ -109,20 +119,15 @@ export default function UploadPage() {
       </nav>
 
       <div className="max-w-2xl mx-auto px-6 py-16">
-
-        {/* Header */}
         <div className="text-center mb-12">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Step 1 of 2</p>
-          <h1 className="font-display text-5xl font-light text-cream mb-4">
-            Upload Your Photos
-          </h1>
+          <h1 className="font-display text-5xl font-light text-cream mb-4">Upload Your Photos</h1>
           <p className="font-body text-sm text-cream-muted leading-relaxed">
-            Upload <strong className="text-cream">10–20 clear selfies</strong> for the best results.
-            Different angles and expressions give you more variety in the final headshots.
+            Upload <strong className="text-cream">10-20 clear selfies</strong> for the best results.
+            Different angles and expressions give you more variety.
           </p>
         </div>
 
-        {/* Tips */}
         <div className="grid grid-cols-2 gap-3 mb-8">
           {[
             { icon: '☀️', tip: 'Good natural lighting' },
@@ -137,14 +142,10 @@ export default function UploadPage() {
           ))}
         </div>
 
-        {/* Dropzone */}
         <div
           {...getRootProps()}
           className={`relative border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-300 mb-6
-            ${isDragActive
-              ? 'border-gold bg-gold/5'
-              : 'border-border hover:border-gold/50 bg-charcoal/30 hover:bg-charcoal/50'
-            }`}
+            ${isDragActive ? 'border-gold bg-gold/5' : 'border-border hover:border-gold/50 bg-charcoal/30 hover:bg-charcoal/50'}`}
         >
           <input {...getInputProps()} />
           <div className="text-4xl mb-3">📸</div>
@@ -153,54 +154,39 @@ export default function UploadPage() {
           </p>
           <p className="font-body text-sm text-cream-muted mb-4">or click to browse your files</p>
           <span className="inline-block px-4 py-2 rounded-full border border-gold/40 text-gold font-body text-xs">
-            JPG, PNG, WEBP · Max 10MB each
+            JPG, PNG, WEBP · Max 20MB each
           </span>
         </div>
 
-        {/* File count indicator */}
         {files.length > 0 && (
           <div className="flex items-center justify-between mb-4">
             <span className="font-body text-sm text-cream-muted">
               {files.length} photo{files.length !== 1 ? 's' : ''} selected
-              {files.length < 10 && (
-                <span className="text-gold ml-1">(need {10 - files.length} more)</span>
-              )}
+              {files.length < 10 && <span className="text-gold ml-1">(need {10 - files.length} more)</span>}
             </span>
-            <button
-              onClick={() => setFiles([])}
-              className="font-body text-xs text-cream-muted hover:text-gold transition-colors"
-            >
+            <button onClick={() => setFiles([])} className="font-body text-xs text-cream-muted hover:text-gold transition-colors">
               Clear all
             </button>
           </div>
         )}
 
-        {/* Photo previews */}
         {files.length > 0 && (
           <div className="grid grid-cols-5 gap-2 mb-8">
             {files.map((file, i) => (
               <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-charcoal group">
-                <Image
-                  src={URL.createObjectURL(file)}
-                  alt={`Upload ${i + 1}`}
-                  fill
-                  className="object-cover"
-                />
+                <Image src={URL.createObjectURL(file)} alt={`Upload ${i + 1}`} fill className="object-cover" />
                 <button
                   onClick={() => removeFile(i)}
                   className="absolute inset-0 flex items-center justify-center bg-obsidian/60 opacity-0 group-hover:opacity-100 transition-opacity text-cream text-lg"
-                >
-                  ✕
-                </button>
+                >x</button>
               </div>
             ))}
           </div>
         )}
 
-        {/* Email */}
         <div className="mb-6">
           <label className="block font-body text-sm text-cream-muted mb-2">
-            Email — we'll send your headshots here
+            Email - we will send your headshots here
           </label>
           <input
             type="email"
@@ -211,57 +197,56 @@ export default function UploadPage() {
           />
         </div>
 
-        {/* Error */}
         {error && (
           <div className="mb-6 px-4 py-3 rounded-xl border border-red-800 bg-red-900/20">
             <p className="font-body text-sm text-red-400">{error}</p>
           </div>
         )}
 
-        {/* Progress bar for min photos */}
         <div className="mb-6">
           <div className="flex justify-between font-body text-xs text-cream-muted mb-1">
-            <span>Photos uploaded</span>
-            <span>{files.length}/10 minimum</span>
+            {loading ? (
+              <><span>{statusMsg}</span><span>{uploadProgress}%</span></>
+            ) : (
+              <><span>Photos selected</span><span>{files.length}/10 minimum</span></>
+            )}
           </div>
           <div className="h-1.5 rounded-full bg-charcoal overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
-                width: `${Math.min((files.length / 10) * 100, 100)}%`,
-                background: files.length >= 10
+                width: loading ? `${uploadProgress}%` : `${Math.min((files.length / 10) * 100, 100)}%`,
+                background: (loading || files.length >= 10)
                   ? 'linear-gradient(90deg, #C9A550, #E2C06A)'
                   : 'linear-gradient(90deg, #666, #888)',
               }}
             />
           </div>
+          {loading && uploadProgress >= 75 && (
+            <p className="font-body text-xs text-cream-muted mt-2 text-center">
+              AI is generating your preview - this takes about 30-60 seconds
+            </p>
+          )}
         </div>
 
-        {/* Submit */}
         <button
           onClick={handleSubmit}
           disabled={loading || files.length < 10 || !email}
           className={`w-full py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300
-            ${(!loading && files.length >= 10 && email)
-              ? 'hover:scale-[1.02] hover:shadow-xl cursor-pointer'
-              : 'opacity-40 cursor-not-allowed'
-            }`}
+            ${(!loading && files.length >= 10 && email) ? 'hover:scale-[1.02] hover:shadow-xl cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
           style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
         >
           {loading ? (
             <span className="flex items-center justify-center gap-2">
               <span className="w-4 h-4 border-2 border-obsidian/30 border-t-obsidian rounded-full animate-spin" />
-              Generating your preview...
+              {statusMsg || 'Working...'}
             </span>
-          ) : (
-            'Generate Preview →'
-          )}
+          ) : 'Generate Preview'}
         </button>
 
         <p className="font-body text-xs text-cream-muted text-center mt-4">
-          🔒 Secured by Stripe · Your photos are never stored beyond 24 hours
+          Secured by Stripe - Your photos are never stored beyond 24 hours
         </p>
-
       </div>
     </main>
   )

@@ -35,7 +35,7 @@ export async function uploadFileToReplicate(
       Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
       'Content-Type': mimeType,
     },
-    body: buffer as unknown as BodyInit,
+    body: new Blob([buffer], { type: mimeType }),
   })
 
   if (!response.ok) {
