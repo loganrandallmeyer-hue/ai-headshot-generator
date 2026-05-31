@@ -271,3 +271,15 @@ function PreviewContent() {
   )
 }
 
+export default function PreviewPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-obsidian text-cream flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+      </main>
+    }>
+      <PreviewContent />
+    </Suspense>
+  )
+}
+

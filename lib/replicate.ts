@@ -1,6 +1,5 @@
 import Replicate from 'replicate'
 
-// PhotoMaker model — preserves face likeness while generating headshots
 const PHOTOMAKER_VERSION =
   'ddfc2b08d209f9fa8c1eca692712918bd449f695d785824b1fe844f1af4041a8'
 
@@ -12,19 +11,14 @@ const HEADSHOT_STYLES = [
   { style: 'Photographic (Default)', bg: 'light grey background, soft lighting' },
 ]
 
-// Tier definitions
 export const TIERS = {
-  basic:    { price: 999,  label: '1 Headshot',   count: 1  },
-  standard: { price: 1999, label: '15 Headshots',  count: 15 },
-  premium:  { price: 2499, label: '30 Headshots',  count: 30 },
+  basic:    { price: 999,  label: '1 Headshot',  count: 1  },
+  standard: { price: 1999, label: '15 Headshots', count: 15 },
+  premium:  { price: 2499, label: '30 Headshots', count: 30 },
 } as const
 
 export type Tier = keyof typeof TIERS
 
-/**
- * Upload a file to Replicate's CDN and return a URL.
- * This is used so we can pass image URLs to the model.
- */
 export async function uploadFileToReplicate(
   buffer: Buffer,
   mimeType: string
@@ -35,7 +29,7 @@ export async function uploadFileToReplicate(
       Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
       'Content-Type': mimeType,
     },
-    body: new Blob([buffer], { type: mimeType }),
+    body: new Blob([new Uint8Array(buffer)], { type: mimeType }),
   })
 
   if (!response.ok) {
@@ -44,13 +38,9 @@ export async function uploadFileToReplicate(
   }
 
   const data = await response.json()
-  // Return the URL that can be used in predictions
   return data.urls.get
 }
 
-/**
- * Generate a single quick preview headshot (fast settings, for watermarked preview).
- */
 export async function generatePreview(imageUrls: string[]): Promise<string> {
   const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
   const primaryImage = imageUrls[0]
@@ -63,11 +53,10 @@ export async function generatePreview(imageUrls: string[]): Promise<string> {
         input_image: primaryImage,
         num_outputs: 1,
         guidance_scale: 5,
-        negative_prompt:
-          'nsfw, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, cartoon, painting, illustration, drawing',
+        negative_prompt: 'nsfw, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, cartoon, painting, illustration, drawing',
         style_name: 'Photographic (Default)',
         style_strength_ratio: 20,
-        num_inference_steps: 30, // faster for preview
+        num_inference_steps: 30,
       },
     }
   ) as string[]
@@ -75,18 +64,12 @@ export async function generatePreview(imageUrls: string[]): Promise<string> {
   return output[0]
 }
 
-/**
- * Generate professional headshots using PhotoMaker.
- * count controls how many total headshots to produce (1, 15, or 30).
- */
 export async function generateHeadshots(imageUrls: string[], count: number = 30): Promise<string[]> {
   const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
   const primaryImage = imageUrls[0]
-
   const allResults: string[] = []
 
   if (count === 1) {
-    // Basic tier — just one headshot
     const output = await replicate.run(
       `tencentarc/photomaker:${PHOTOMAKER_VERSION}`,
       {
@@ -95,8 +78,7 @@ export async function generateHeadshots(imageUrls: string[], count: number = 30)
           input_image: primaryImage,
           num_outputs: 1,
           guidance_scale: 5,
-          negative_prompt:
-            'nsfw, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, cartoon, painting, illustration, drawing',
+          negative_prompt: 'nsfw, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, cartoon, painting, illustration, drawing',
           style_name: 'Photographic (Default)',
           style_strength_ratio: 20,
           num_inference_steps: 50,
@@ -106,8 +88,6 @@ export async function generateHeadshots(imageUrls: string[], count: number = 30)
     return output
   }
 
-  // For 15 or 30, distribute across styles
-  // 15 = 3 styles × 5 each; 30 = 5 styles × 6 each
   const stylesToUse = count === 15 ? HEADSHOT_STYLES.slice(0, 3) : HEADSHOT_STYLES
   const perStyle = Math.ceil(count / stylesToUse.length)
 
@@ -122,8 +102,7 @@ export async function generateHeadshots(imageUrls: string[], count: number = 30)
           input_image: primaryImage,
           num_outputs: perStyle,
           guidance_scale: 5,
-          negative_prompt:
-            'nsfw, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, cartoon, painting, illustration, drawing',
+          negative_prompt: 'nsfw, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, cartoon, painting, illustration, drawing',
           style_name: style,
           style_strength_ratio: 20,
           num_inference_steps: 50,
