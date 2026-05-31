@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { uploadFileToReplicate } from '@/lib/replicate'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-// Accepts a single file, uploads it to Replicate CDN, returns its URL.
-// Called once per photo from the client so we never hit Vercel's 4.5MB body limit.
+// Accepts a single file, converts it to a base64 data URL.
+// Replicate models accept data URLs directly — no CDN upload needed.
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData()
@@ -16,10 +15,9 @@ export async function POST(req: NextRequest) {
     }
 
     const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    const base64 = Buffer.from(bytes).toString('base64')
     const mimeType = file.type || 'image/jpeg'
-
-    const url = await uploadFileToReplicate(buffer, mimeType)
+    const url = `data:${mimeType};base64,${base64}`
 
     return NextResponse.json({ url })
   } catch (error) {
