@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { generateHeadshots } from '@/lib/replicate'
+import { generateHeadshots, TIERS, Tier } from '@/lib/replicate'
 import { sendHeadshotsEmail } from '@/lib/email'
 
 export const runtime = 'nodejs'
@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
   const session = event.data.object as Stripe.Checkout.Session
   const metadata = session.metadata || {}
   const email = metadata.email
+  const tier = (metadata.tier || 'premium') as Tier
 
   if (!email) {
     console.error('No email in session metadata')
@@ -55,10 +56,11 @@ export async function POST(req: NextRequest) {
       throw new Error('No file URLs found in metadata')
     }
 
-    console.log(`Generating headshots for ${email} with ${fileUrls.length} source images`)
+    const count = TIERS[tier]?.count ?? 30
+    console.log(`Generating ${count} headshots for ${email} (tier: ${tier})`)
 
     // Generate headshots with AI
-    const headshots = await generateHeadshots(fileUrls)
+    const headshots = await generateHeadshots(fileUrls, count)
 
     console.log(`Generated ${headshots.length} headshots for ${email}`)
 

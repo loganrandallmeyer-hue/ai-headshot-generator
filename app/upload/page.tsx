@@ -43,7 +43,7 @@ export default function UploadPage() {
     setError('')
 
     try {
-      // 1. Upload images to our API (which uploads to Replicate CDN)
+      // 1. Upload images + generate watermarked preview
       const formData = new FormData()
       files.forEach((file) => formData.append('files', file))
       formData.append('email', email)
@@ -54,20 +54,18 @@ export default function UploadPage() {
       })
 
       if (!uploadRes.ok) throw new Error('Upload failed. Please try again.')
-      const { fileUrls, sessionId } = await uploadRes.json()
+      const { fileUrls, sessionId, previewUrl } = await uploadRes.json()
 
-      // 2. Create Stripe checkout session
-      const checkoutRes = await fetch('/api/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, fileUrls, sessionId }),
+      // 2. Store file URLs in sessionStorage so the preview page can access them
+      sessionStorage.setItem(`snapshot_urls_${sessionId}`, JSON.stringify(fileUrls))
+
+      // 3. Redirect to preview page (tier selection + watermarked preview)
+      const params = new URLSearchParams({
+        session_id: sessionId,
+        email,
+        preview_url: encodeURIComponent(previewUrl),
       })
-
-      if (!checkoutRes.ok) throw new Error('Payment setup failed. Please try again.')
-      const { checkoutUrl } = await checkoutRes.json()
-
-      // 3. Redirect to Stripe
-      window.location.href = checkoutUrl
+      window.location.href = `/preview?${params.toString()}`
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
       setLoading(false)
@@ -231,10 +229,10 @@ export default function UploadPage() {
           {loading ? (
             <span className="flex items-center justify-center gap-2">
               <span className="w-4 h-4 border-2 border-obsidian/30 border-t-obsidian rounded-full animate-spin" />
-              Uploading securely...
+              Generating your preview...
             </span>
           ) : (
-            'Continue to Payment — $24.99 →'
+            'Generate Preview →'
           )}
         </button>
 

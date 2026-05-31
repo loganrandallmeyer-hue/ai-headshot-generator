@@ -12,6 +12,15 @@ const HEADSHOT_STYLES = [
   { style: 'Photographic (Default)', bg: 'light grey background, soft lighting' },
 ]
 
+// Tier definitions
+export const TIERS = {
+  basic:    { price: 999,  label: '1 Headshot',   count: 1  },
+  standard: { price: 1999, label: '15 Headshots',  count: 15 },
+  premium:  { price: 2499, label: '30 Headshots',  count: 30 },
+} as const
+
+export type Tier = keyof typeof TIERS
+
 /**
  * Upload a file to Replicate's CDN and return a URL.
  * This is used so we can pass image URLs to the model.
@@ -40,18 +49,69 @@ export async function uploadFileToReplicate(
 }
 
 /**
- * Generate professional headshots using PhotoMaker.
- * Takes the first uploaded image as the face reference.
- * Returns an array of image URLs.
+ * Generate a single quick preview headshot (fast settings, for watermarked preview).
  */
-export async function generateHeadshots(imageUrls: string[]): Promise<string[]> {
+export async function generatePreview(imageUrls: string[]): Promise<string> {
   const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
-  const primaryImage = imageUrls[0] // Use first image as main face reference
+  const primaryImage = imageUrls[0]
+
+  const output = await replicate.run(
+    `tencentarc/photomaker:${PHOTOMAKER_VERSION}`,
+    {
+      input: {
+        prompt: 'professional corporate headshot photo of a person img, white background, studio lighting, sharp focus, high resolution, business attire, confident expression, photorealistic',
+        input_image: primaryImage,
+        num_outputs: 1,
+        guidance_scale: 5,
+        negative_prompt:
+          'nsfw, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, cartoon, painting, illustration, drawing',
+        style_name: 'Photographic (Default)',
+        style_strength_ratio: 20,
+        num_inference_steps: 30, // faster for preview
+      },
+    }
+  ) as string[]
+
+  return output[0]
+}
+
+/**
+ * Generate professional headshots using PhotoMaker.
+ * count controls how many total headshots to produce (1, 15, or 30).
+ */
+export async function generateHeadshots(imageUrls: string[], count: number = 30): Promise<string[]> {
+  const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
+  const primaryImage = imageUrls[0]
 
   const allResults: string[] = []
 
-  // Generate headshots for each style (10 per style = 50 total)
-  for (const { style, bg } of HEADSHOT_STYLES) {
+  if (count === 1) {
+    // Basic tier — just one headshot
+    const output = await replicate.run(
+      `tencentarc/photomaker:${PHOTOMAKER_VERSION}`,
+      {
+        input: {
+          prompt: 'professional corporate headshot photo of a person img, white background, studio lighting, sharp focus, high resolution, business attire, confident expression, photorealistic',
+          input_image: primaryImage,
+          num_outputs: 1,
+          guidance_scale: 5,
+          negative_prompt:
+            'nsfw, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, cartoon, painting, illustration, drawing',
+          style_name: 'Photographic (Default)',
+          style_strength_ratio: 20,
+          num_inference_steps: 50,
+        },
+      }
+    ) as string[]
+    return output
+  }
+
+  // For 15 or 30, distribute across styles
+  // 15 = 3 styles × 5 each; 30 = 5 styles × 6 each
+  const stylesToUse = count === 15 ? HEADSHOT_STYLES.slice(0, 3) : HEADSHOT_STYLES
+  const perStyle = Math.ceil(count / stylesToUse.length)
+
+  for (const { style, bg } of stylesToUse) {
     const prompt = `professional corporate headshot photo of a person img, ${bg}, sharp focus, high resolution, business attire, confident expression, photorealistic`
 
     const output = await replicate.run(
@@ -60,7 +120,7 @@ export async function generateHeadshots(imageUrls: string[]): Promise<string[]> 
         input: {
           prompt,
           input_image: primaryImage,
-          num_outputs: 10,
+          num_outputs: perStyle,
           guidance_scale: 5,
           negative_prompt:
             'nsfw, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, cartoon, painting, illustration, drawing',
@@ -72,7 +132,8 @@ export async function generateHeadshots(imageUrls: string[]): Promise<string[]> 
     ) as string[]
 
     allResults.push(...output)
+    if (allResults.length >= count) break
   }
 
-  return allResults
+  return allResults.slice(0, count)
 }

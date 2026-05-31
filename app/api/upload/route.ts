@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { uploadFileToReplicate } from '@/lib/replicate'
+import { uploadFileToReplicate, generatePreview } from '@/lib/replicate'
 import { randomUUID } from 'crypto'
 
 export const runtime = 'nodejs'
-export const maxDuration = 60 // 60 seconds timeout for file uploads
+export const maxDuration = 120 // 2 min — includes preview generation
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,10 +30,13 @@ export async function POST(req: NextRequest) {
       fileUrls.push(url)
     }
 
+    // Generate a single preview headshot (fast settings — watermark shown to user before payment)
+    const previewUrl = await generatePreview(fileUrls)
+
     // Generate a unique session ID to track this order
     const sessionId = randomUUID()
 
-    return NextResponse.json({ fileUrls, sessionId, email })
+    return NextResponse.json({ fileUrls, sessionId, email, previewUrl })
   } catch (error) {
     console.error('Upload error:', error)
     return NextResponse.json(
