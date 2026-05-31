@@ -21,7 +21,7 @@ const STEPS = [
   {
     number: '02',
     title: 'Pay Once, Keep Forever',
-    desc: 'One flat fee of $24.99. No subscriptions, no hidden costs. Yours to keep forever.',
+    desc: 'See a watermarked preview first, then pick a package from $9.99. No subscriptions, no hidden costs.',
   },
   {
     number: '03',
@@ -88,7 +88,7 @@ export default function LandingPage() {
 
         {/* Subheadline */}
         <p className="animate-fade-up delay-200 font-body text-lg md:text-xl text-cream-muted max-w-xl mx-auto mb-10 leading-relaxed">
-          Upload 10 selfies. Receive 50 stunning, professional-grade AI headshots in your inbox within 30 minutes — for just $24.99.
+          Upload 10 selfies. Get a watermarked preview first — then choose your package. Starting at $9.99.
         </p>
 
         {/* CTA */}
@@ -101,7 +101,7 @@ export default function LandingPage() {
             <span>Generate My Headshots</span>
             <span className="text-lg">→</span>
           </Link>
-          <p className="font-body text-sm text-cream-muted">$24.99 one-time · No subscription</p>
+          <p className="font-body text-sm text-cream-muted">From $9.99 · One-time · No subscription</p>
         </div>
 
         {/* Social proof */}
@@ -178,49 +178,77 @@ export default function LandingPage() {
 
       {/* ── PRICING ── */}
       <section className="px-6 py-24">
-        <div className="max-w-lg mx-auto">
-          <div className="text-center mb-10">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
             <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Pricing</p>
             <h2 className="font-display text-4xl md:text-5xl font-light text-cream">Simple. One-time. Fair.</h2>
+            <p className="font-body text-sm text-cream-muted mt-3">Pick your package — see a watermarked preview first, pay only if you love it.</p>
           </div>
 
-          <div
-            className="relative rounded-3xl p-1"
-            style={{ background: 'linear-gradient(135deg, #C9A550, #8B6914, #C9A550)' }}
-          >
-            <div className="rounded-[22px] bg-charcoal p-10 text-center">
-              <div className="font-display text-7xl font-semibold text-cream mb-1">$24.99</div>
-              <p className="font-body text-sm text-cream-muted mb-8">one-time payment · no subscription ever</p>
+          <div className="grid md:grid-cols-3 gap-6">
 
-              <ul className="space-y-3 mb-10 text-left">
-                {[
-                  '50 unique AI-generated headshots',
-                  '5 different background styles',
-                  'High-resolution downloads (4K)',
-                  'Commercial use license included',
-                  'Delivered to your inbox in 30 min',
-                  'Full refund if unsatisfied',
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 font-body text-sm text-cream-muted">
-                    <span className="text-gold text-lg">✓</span>
-                    <span>{item}</span>
+            {/* Basic */}
+            <div className="rounded-2xl border border-border bg-charcoal/50 p-8 flex flex-col hover:border-gold/40 transition-colors duration-300">
+              <p className="font-body text-xs tracking-widest uppercase text-cream-muted mb-2">Basic</p>
+              <div className="font-display text-5xl font-semibold text-cream mb-1">$9.99</div>
+              <p className="font-body text-xs text-cream-muted mb-6">one-time · no subscription</p>
+              <ul className="space-y-2 mb-8 flex-1">
+                {['1 professional headshot', 'Studio lighting', 'High-resolution download', 'Commercial use license'].map((item) => (
+                  <li key={item} className="flex items-center gap-2 font-body text-sm text-cream-muted">
+                    <span className="text-gold">✓</span><span>{item}</span>
                   </li>
                 ))}
               </ul>
-
-              <Link
-                href="/upload"
-                className="block w-full py-4 rounded-full font-body font-medium text-obsidian text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
-                style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
-              >
-                Get My Headshots Now →
+              <Link href="/upload" className="block w-full py-3 rounded-full font-body font-medium text-center border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300">
+                Get Started →
               </Link>
-
-              <p className="font-body text-xs text-cream-muted mt-4">
-                Secured by Stripe · Instant delivery
-              </p>
             </div>
+
+            {/* Standard — popular */}
+            <div className="relative rounded-2xl p-1" style={{ background: 'linear-gradient(135deg, #C9A550, #8B6914, #C9A550)' }}>
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[11px] font-body font-semibold tracking-wider uppercase text-obsidian"
+                style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}>
+                Most Popular
+              </div>
+              <div className="rounded-[14px] bg-charcoal p-8 flex flex-col h-full">
+                <p className="font-body text-xs tracking-widest uppercase text-gold mb-2">Standard</p>
+                <div className="font-display text-5xl font-semibold text-cream mb-1">$19.99</div>
+                <p className="font-body text-xs text-cream-muted mb-6">one-time · no subscription</p>
+                <ul className="space-y-2 mb-8 flex-1">
+                  {['15 professional headshots', '3 background styles', 'High-resolution downloads', 'Commercial use license', 'Delivered in 30 min'].map((item) => (
+                    <li key={item} className="flex items-center gap-2 font-body text-sm text-cream-muted">
+                      <span className="text-gold">✓</span><span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/upload" className="block w-full py-3 rounded-full font-body font-medium text-obsidian text-center transition-all duration-300 hover:scale-[1.02]"
+                  style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}>
+                  Get Started →
+                </Link>
+              </div>
+            </div>
+
+            {/* Premium */}
+            <div className="rounded-2xl border border-border bg-charcoal/50 p-8 flex flex-col hover:border-gold/40 transition-colors duration-300">
+              <p className="font-body text-xs tracking-widest uppercase text-cream-muted mb-2">Premium</p>
+              <div className="font-display text-5xl font-semibold text-cream mb-1">$24.99</div>
+              <p className="font-body text-xs text-cream-muted mb-6">one-time · no subscription</p>
+              <ul className="space-y-2 mb-8 flex-1">
+                {['30 professional headshots', '5 background styles', 'High-resolution downloads', 'Commercial use license', 'Delivered in 30 min', 'Best value'].map((item) => (
+                  <li key={item} className="flex items-center gap-2 font-body text-sm text-cream-muted">
+                    <span className="text-gold">✓</span><span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/upload" className="block w-full py-3 rounded-full font-body font-medium text-center border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300">
+                Get Started →
+              </Link>
+            </div>
+
           </div>
+          <p className="font-body text-xs text-cream-muted text-center mt-6">
+            🔒 Secured by Stripe · See a watermarked preview before you pay
+          </p>
         </div>
       </section>
 
@@ -254,7 +282,7 @@ export default function LandingPage() {
           className="gold-glow inline-flex items-center gap-3 px-10 py-5 rounded-full font-body font-medium text-obsidian text-lg transition-all duration-300 hover:scale-105"
           style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
         >
-          Start Now — $24.99
+          Get My Headshots →
         </Link>
       </section>
 
