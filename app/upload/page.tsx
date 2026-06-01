@@ -28,12 +28,13 @@ export default function UploadPage() {
     setFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
+  // Compress aggressively — 400px max, quality 0.65 — keeps each image ~15-30KB
   const compressFile = (file: File): Promise<File> =>
     new Promise((resolve) => {
       const img = new window.Image()
       img.onload = () => {
         const canvas = document.createElement('canvas')
-        const MAX = 1200
+        const MAX = 400
         const scale = Math.min(MAX / img.width, MAX / img.height, 1)
         canvas.width = Math.round(img.width * scale)
         canvas.height = Math.round(img.height * scale)
@@ -41,7 +42,7 @@ export default function UploadPage() {
         canvas.toBlob(
           (blob) => resolve(new File([blob!], file.name, { type: 'image/jpeg' })),
           'image/jpeg',
-          0.85
+          0.65
         )
         URL.revokeObjectURL(img.src)
       }
@@ -75,11 +76,12 @@ export default function UploadPage() {
         if (!res.ok) throw new Error('Upload failed. Please try again.')
         const { url } = await res.json()
         fileUrls.push(url)
-        setUploadProgress(Math.round(((i + 1) / files.length) * 70))
+        setUploadProgress(Math.round(((i + 1) / files.length) * 60))
       }
 
-      setStatusMsg('Generating your preview...')
-      setUploadProgress(75)
+      // Start the AI preview generation (returns immediately with a prediction ID)
+      setStatusMsg('Starting AI generation...')
+      setUploadProgress(65)
 
       const previewRes = await fetch('/api/generate-preview', {
         method: 'POST',
@@ -87,10 +89,35 @@ export default function UploadPage() {
         body: JSON.stringify({ fileUrls, email }),
       })
       if (!previewRes.ok) throw new Error('Preview generation failed. Please try again.')
-      const { previewUrl, sessionId } = await previewRes.json()
+      const { predictionId, sessionId } = await previewRes.json()
+
+      // Store file URLs for checkout step
+      sessionStorage.setItem(`snapshot_urls_${sessionId}`, JSON.stringify(fileUrls))
+
+      // Poll until the preview is ready
+      setStatusMsg('AI is generating your preview...')
+      setUploadProgress(70)
+
+      let previewUrl = ''
+      for (let attempt = 0; attempt < 60; attempt++) {
+        await new Promise((r) => setTimeout(r, 3000))
+        const poll = await fetch(`/api/check-preview?id=${predictionId}`)
+        const result = await poll.json()
+
+        if (result.status === 'done') {
+          previewUrl = result.previewUrl
+          break
+        }
+        if (result.status === 'failed') {
+          throw new Error('Preview generation failed. Please try again.')
+        }
+        // Still pending — update progress bar
+        setUploadProgress(Math.min(70 + attempt * 1, 95))
+      }
+
+      if (!previewUrl) throw new Error('Preview timed out. Please try again.')
 
       setUploadProgress(100)
-      sessionStorage.setItem(`snapshot_urls_${sessionId}`, JSON.stringify(fileUrls))
 
       const params = new URLSearchParams({
         session_id: sessionId,
@@ -130,13 +157,12 @@ export default function UploadPage() {
 
         <div className="grid grid-cols-2 gap-3 mb-8">
           {[
-            { icon: '☀️', tip: 'Good natural lighting' },
-            { icon: '🙂', tip: 'Face clearly visible' },
-            { icon: '📐', tip: 'Different angles' },
-            { icon: '🚫', tip: 'No sunglasses or hats' },
-          ].map(({ icon, tip }) => (
+            { icon: 'sun', tip: 'Good natural lighting' },
+            { icon: 'face', tip: 'Face clearly visible' },
+            { icon: 'angle', tip: 'Different angles' },
+            { icon: 'no', tip: 'No sunglasses or hats' },
+          ].map(({ tip }) => (
             <div key={tip} className="flex items-center gap-2 px-4 py-3 rounded-xl border border-border bg-charcoal/40">
-              <span className="text-lg">{icon}</span>
               <span className="font-body text-xs text-cream-muted">{tip}</span>
             </div>
           ))}
@@ -148,13 +174,12 @@ export default function UploadPage() {
             ${isDragActive ? 'border-gold bg-gold/5' : 'border-border hover:border-gold/50 bg-charcoal/30 hover:bg-charcoal/50'}`}
         >
           <input {...getInputProps()} />
-          <div className="text-4xl mb-3">📸</div>
           <p className="font-display text-xl text-cream mb-1">
-            {isDragActive ? 'Drop your photos here' : 'Drag & drop your photos'}
+            {isDragActive ? 'Drop your photos here' : 'Drag and drop your photos'}
           </p>
           <p className="font-body text-sm text-cream-muted mb-4">or click to browse your files</p>
           <span className="inline-block px-4 py-2 rounded-full border border-gold/40 text-gold font-body text-xs">
-            JPG, PNG, WEBP · Max 20MB each
+            JPG, PNG, WEBP - Max 20MB each
           </span>
         </div>
 
@@ -222,7 +247,7 @@ export default function UploadPage() {
               }}
             />
           </div>
-          {loading && uploadProgress >= 75 && (
+          {loading && uploadProgress >= 65 && (
             <p className="font-body text-xs text-cream-muted mt-2 text-center">
               AI is generating your preview - this takes about 30-60 seconds
             </p>

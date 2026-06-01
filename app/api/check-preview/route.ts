@@ -1,0 +1,28 @@
+import { NextRequest, NextResponse } from 'next/server'
+import Replicate from 'replicate'
+
+export const runtime = 'nodejs'
+export const maxDuration = 15
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url)
+  const predictionId = searchParams.get('id')
+
+  if (!predictionId) {
+    return NextResponse.json({ error: 'Missing prediction ID' }, { status: 400 })
+  }
+
+  const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
+  const prediction = await replicate.predictions.get(predictionId)
+
+  if (prediction.status === 'succeeded') {
+    const output = prediction.output as string[]
+    return NextResponse.json({ status: 'done', previewUrl: output[0] })
+  }
+
+  if (prediction.status === 'failed' || prediction.status === 'canceled') {
+    return NextResponse.json({ status: 'failed', error: 'Preview generation failed.' })
+  }
+
+  return NextResponse.json({ status: 'pending' })
+}
