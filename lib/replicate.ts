@@ -1,7 +1,7 @@
 import Replicate from 'replicate'
 
 const PHOTOMAKER_VERSION =
-  'ddfc2b08d209f9fa8c1eca692712918bd449f695d785824b1fe844f1af4041a8'
+  'ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570fe4'
 
 const HEADSHOT_STYLES = [
   { style: 'Photographic (Default)', bg: 'white background, studio lighting' },

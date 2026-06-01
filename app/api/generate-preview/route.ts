@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto'
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-const PHOTOMAKER_VERSION = 'ddfc2b08d209f9fa8c1eca692712918bd449f695d785824b1fe844f1af4041a8'
+const PHOTOMAKER_VERSION = 'ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570fe4'
 
 // Starts a Replicate prediction and returns the prediction ID immediately.
 // The client polls /api/check-preview to get the result.
