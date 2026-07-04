@@ -16,10 +16,12 @@ function SuccessContent() {
 
       {/* Icon */}
       <div
-        className="relative w-24 h-24 rounded-full flex items-center justify-center mb-8 text-4xl"
+        className="relative w-24 h-24 rounded-full flex items-center justify-center mb-8 text-gold"
         style={{ background: 'linear-gradient(135deg, rgba(201,165,80,0.2), rgba(201,165,80,0.05))', border: '1px solid rgba(201,165,80,0.3)' }}
       >
-        ✨
+        <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 6L9 17l-5-5" />
+        </svg>
       </div>
 
       <p className="font-body text-xs tracking-widest uppercase text-gold mb-4">Payment Confirmed</p>
@@ -30,11 +32,11 @@ function SuccessContent() {
       </h1>
 
       <p className="font-body text-base text-cream-muted max-w-md mb-4 leading-relaxed">
-        Our AI is generating your 50 professional headshots right now. Expect them in your inbox within <strong className="text-cream">15–30 minutes</strong>.
+        Our AI is generating your professional headshots right now. Expect them in your inbox within <strong className="text-cream">15–30 minutes</strong>.
       </p>
 
       <div className="px-6 py-3 rounded-full border border-gold/30 bg-gold/5 mb-12">
-        <p className="font-body text-sm text-gold">📨 Sending to: {email}</p>
+        <p className="font-body text-sm text-gold">Delivering to: {email}</p>
       </div>
 
       {/* What to do while waiting */}

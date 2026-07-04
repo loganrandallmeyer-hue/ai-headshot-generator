@@ -1,4 +1,12 @@
-.vercel
+# Secrets — NEVER commit these
+.env
+.env.local
+.env*.local
 
+# Dependencies & build output
 node_modules/
 .next/
+tsconfig.tsbuildinfo
+
+# Vercel
+.vercel

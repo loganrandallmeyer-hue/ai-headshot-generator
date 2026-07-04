@@ -1,20 +1,41 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Link from 'next/link'
-import Image from 'next/image'
+
+interface PhotoItem {
+  file: File
+  preview: string // object URL for the thumbnail grid
+}
+
+const MIN_PHOTOS = 10
+const MAX_PHOTOS = 20
 
 export default function UploadPage() {
-  const [files, setFiles] = useState<File[]>([])
+  const [photos, setPhotos] = useState<PhotoItem[]>([])
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [statusMsg, setStatusMsg] = useState('')
   const [error, setError] = useState('')
+  const photosRef = useRef<PhotoItem[]>([])
+  photosRef.current = photos
+
+  // Revoke all object URLs on unmount (prevents memory leaks)
+  useEffect(() => {
+    return () => photosRef.current.forEach((p) => URL.revokeObjectURL(p.preview))
+  }, [])
 
   const onDrop = useCallback((accepted: File[]) => {
-    setFiles((prev) => [...prev, ...accepted].slice(0, 20))
+    setPhotos((prev) => {
+      const room = MAX_PHOTOS - prev.length
+      const added = accepted.slice(0, room).map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+      }))
+      return [...prev, ...added]
+    })
     setError('')
   }, [])
 
@@ -24,34 +45,49 @@ export default function UploadPage() {
     maxSize: 20 * 1024 * 1024,
   })
 
-  const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index))
+  const removePhoto = (index: number) => {
+    setPhotos((prev) => {
+      URL.revokeObjectURL(prev[index].preview)
+      return prev.filter((_, i) => i !== index)
+    })
   }
 
-  // Compress aggressively — 400px max, quality 0.65 — keeps each image ~15-30KB
-  const compressFile = (file: File): Promise<File> =>
-    new Promise((resolve) => {
+  const clearAll = () => {
+    photos.forEach((p) => URL.revokeObjectURL(p.preview))
+    setPhotos([])
+  }
+
+  // Compress in the browser and produce a data URL directly —
+  // no server round-trip needed per photo.
+  const compressToDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
       const img = new window.Image()
+      const objectUrl = URL.createObjectURL(file)
       img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const MAX = 400
-        const scale = Math.min(MAX / img.width, MAX / img.height, 1)
-        canvas.width = Math.round(img.width * scale)
-        canvas.height = Math.round(img.height * scale)
-        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
-        canvas.toBlob(
-          (blob) => resolve(new File([blob!], file.name, { type: 'image/jpeg' })),
-          'image/jpeg',
-          0.65
-        )
-        URL.revokeObjectURL(img.src)
+        try {
+          const canvas = document.createElement('canvas')
+          const MAX = 400
+          const scale = Math.min(MAX / img.width, MAX / img.height, 1)
+          canvas.width = Math.round(img.width * scale)
+          canvas.height = Math.round(img.height * scale)
+          canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+          resolve(canvas.toDataURL('image/jpeg', 0.65))
+        } catch (e) {
+          reject(e)
+        } finally {
+          URL.revokeObjectURL(objectUrl)
+        }
       }
-      img.src = URL.createObjectURL(file)
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl)
+        reject(new Error(`Could not read ${file.name}. Please remove it and try another photo.`))
+      }
+      img.src = objectUrl
     })
 
   const handleSubmit = async () => {
-    if (files.length < 10) {
-      setError('Please upload at least 10 photos for best results.')
+    if (photos.length < MIN_PHOTOS) {
+      setError(`Please upload at least ${MIN_PHOTOS} photos for best results.`)
       return
     }
     if (!email || !email.includes('@')) {
@@ -64,55 +100,60 @@ export default function UploadPage() {
     setUploadProgress(0)
 
     try {
+      // Encode all photos locally (fast — no uploads yet)
       const fileUrls: string[] = []
-
-      for (let i = 0; i < files.length; i++) {
-        setStatusMsg(`Uploading photo ${i + 1} of ${files.length}...`)
-        const compressed = await compressFile(files[i])
-        const fd = new FormData()
-        fd.append('file', compressed)
-
-        const res = await fetch('/api/upload', { method: 'POST', body: fd })
-        if (!res.ok) throw new Error('Upload failed. Please try again.')
-        const { url } = await res.json()
-        fileUrls.push(url)
-        setUploadProgress(Math.round(((i + 1) / files.length) * 60))
+      for (let i = 0; i < photos.length; i++) {
+        setStatusMsg(`Preparing photo ${i + 1} of ${photos.length}...`)
+        fileUrls.push(await compressToDataUrl(photos[i].file))
+        setUploadProgress(Math.round(((i + 1) / photos.length) * 40))
       }
 
       // Start the AI preview generation (returns immediately with a prediction ID)
       setStatusMsg('Starting AI generation...')
-      setUploadProgress(65)
+      setUploadProgress(50)
 
       const previewRes = await fetch('/api/generate-preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileUrls, email }),
       })
-      if (!previewRes.ok) throw new Error('Preview generation failed. Please try again.')
+      if (!previewRes.ok) {
+        const data = await previewRes.json().catch(() => ({}))
+        throw new Error(data.error || 'Preview generation failed. Please try again.')
+      }
       const { predictionId, sessionId } = await previewRes.json()
 
-      // Store file URLs for checkout step
-      sessionStorage.setItem(`snapshot_urls_${sessionId}`, JSON.stringify(fileUrls))
-
-      // Poll until the preview is ready
+      // Poll until the preview is ready — tolerating transient network errors
       setStatusMsg('AI is generating your preview...')
-      setUploadProgress(70)
+      setUploadProgress(55)
 
       let previewUrl = ''
+      let consecutiveFailures = 0
       for (let attempt = 0; attempt < 60; attempt++) {
         await new Promise((r) => setTimeout(r, 3000))
-        const poll = await fetch(`/api/check-preview?id=${predictionId}`)
-        const result = await poll.json()
+        try {
+          const poll = await fetch(`/api/check-preview?id=${predictionId}`)
+          const result = await poll.json()
+          consecutiveFailures = 0
 
-        if (result.status === 'done') {
-          previewUrl = result.previewUrl
-          break
+          if (result.status === 'done') {
+            previewUrl = result.previewUrl
+            break
+          }
+          if (result.status === 'failed') {
+            throw new Error('FATAL:Preview generation failed. Please try again.')
+          }
+        } catch (e) {
+          if (e instanceof Error && e.message.startsWith('FATAL:')) {
+            throw new Error(e.message.slice(6))
+          }
+          // Transient network/server hiccup — keep polling unless persistent
+          consecutiveFailures++
+          if (consecutiveFailures >= 5) {
+            throw new Error('Lost connection while generating your preview. Please try again.')
+          }
         }
-        if (result.status === 'failed') {
-          throw new Error('Preview generation failed. Please try again.')
-        }
-        // Still pending — update progress bar
-        setUploadProgress(Math.min(70 + attempt * 1, 95))
+        setUploadProgress(Math.min(55 + attempt, 95))
       }
 
       if (!previewUrl) throw new Error('Preview timed out. Please try again.')
@@ -122,6 +163,7 @@ export default function UploadPage() {
       const params = new URLSearchParams({
         session_id: sessionId,
         email,
+        prediction_id: predictionId,
         preview_url: encodeURIComponent(previewUrl),
       })
       window.location.href = `/preview?${params.toString()}`
@@ -150,19 +192,48 @@ export default function UploadPage() {
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Step 1 of 2</p>
           <h1 className="font-display text-5xl font-light text-cream mb-4">Upload Your Photos</h1>
           <p className="font-body text-sm text-cream-muted leading-relaxed">
-            Upload <strong className="text-cream">10-20 clear selfies</strong> for the best results.
+            Upload <strong className="text-cream">10&ndash;20 clear selfies</strong> for the best results.
             Different angles and expressions give you more variety.
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-8">
           {[
-            { icon: 'sun', tip: 'Good natural lighting' },
-            { icon: 'face', tip: 'Face clearly visible' },
-            { icon: 'angle', tip: 'Different angles' },
-            { icon: 'no', tip: 'No sunglasses or hats' },
-          ].map(({ tip }) => (
-            <div key={tip} className="flex items-center gap-2 px-4 py-3 rounded-xl border border-border bg-charcoal/40">
+            {
+              tip: 'Good natural lighting',
+              icon: (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+                </svg>
+              ),
+            },
+            {
+              tip: 'Face clearly visible',
+              icon: (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6" />
+                </svg>
+              ),
+            },
+            {
+              tip: 'Different angles',
+              icon: (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12a9 9 0 1 1-9-9" /><path d="M21 3v6h-6" />
+                </svg>
+              ),
+            },
+            {
+              tip: 'No sunglasses or hats',
+              icon: (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" /><path d="M5 5l14 14" />
+                </svg>
+              ),
+            },
+          ].map(({ tip, icon }) => (
+            <div key={tip} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-charcoal/40">
+              <span className="text-gold shrink-0">{icon}</span>
               <span className="font-body text-xs text-cream-muted">{tip}</span>
             </div>
           ))}
@@ -179,31 +250,37 @@ export default function UploadPage() {
           </p>
           <p className="font-body text-sm text-cream-muted mb-4">or click to browse your files</p>
           <span className="inline-block px-4 py-2 rounded-full border border-gold/40 text-gold font-body text-xs">
-            JPG, PNG, WEBP - Max 20MB each
+            JPG, PNG, WEBP &middot; Max 20MB each
           </span>
         </div>
 
-        {files.length > 0 && (
+        {photos.length > 0 && (
           <div className="flex items-center justify-between mb-4">
             <span className="font-body text-sm text-cream-muted">
-              {files.length} photo{files.length !== 1 ? 's' : ''} selected
-              {files.length < 10 && <span className="text-gold ml-1">(need {10 - files.length} more)</span>}
+              {photos.length} photo{photos.length !== 1 ? 's' : ''} selected
+              {photos.length < MIN_PHOTOS && <span className="text-gold ml-1">(need {MIN_PHOTOS - photos.length} more)</span>}
             </span>
-            <button onClick={() => setFiles([])} className="font-body text-xs text-cream-muted hover:text-gold transition-colors">
+            <button onClick={clearAll} className="font-body text-xs text-cream-muted hover:text-gold transition-colors">
               Clear all
             </button>
           </div>
         )}
 
-        {files.length > 0 && (
+        {photos.length > 0 && (
           <div className="grid grid-cols-5 gap-2 mb-8">
-            {files.map((file, i) => (
-              <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-charcoal group">
-                <Image src={URL.createObjectURL(file)} alt={`Upload ${i + 1}`} fill className="object-cover" />
+            {photos.map((photo, i) => (
+              <div key={photo.preview} className="relative aspect-square rounded-xl overflow-hidden bg-charcoal group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={photo.preview} alt={`Upload ${i + 1}`} className="absolute inset-0 w-full h-full object-cover" />
                 <button
-                  onClick={() => removeFile(i)}
+                  onClick={() => removePhoto(i)}
+                  aria-label={`Remove photo ${i + 1}`}
                   className="absolute inset-0 flex items-center justify-center bg-obsidian/60 opacity-0 group-hover:opacity-100 transition-opacity text-cream text-lg"
-                >x</button>
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             ))}
           </div>
@@ -211,7 +288,7 @@ export default function UploadPage() {
 
         <div className="mb-6">
           <label className="block font-body text-sm text-cream-muted mb-2">
-            Email - we will send your headshots here
+            Email &middot; we will send your headshots here
           </label>
           <input
             type="email"
@@ -233,32 +310,32 @@ export default function UploadPage() {
             {loading ? (
               <><span>{statusMsg}</span><span>{uploadProgress}%</span></>
             ) : (
-              <><span>Photos selected</span><span>{files.length}/10 minimum</span></>
+              <><span>Photos selected</span><span>{photos.length}/{MIN_PHOTOS} minimum</span></>
             )}
           </div>
           <div className="h-1.5 rounded-full bg-charcoal overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
-                width: loading ? `${uploadProgress}%` : `${Math.min((files.length / 10) * 100, 100)}%`,
-                background: (loading || files.length >= 10)
+                width: loading ? `${uploadProgress}%` : `${Math.min((photos.length / MIN_PHOTOS) * 100, 100)}%`,
+                background: (loading || photos.length >= MIN_PHOTOS)
                   ? 'linear-gradient(90deg, #C9A550, #E2C06A)'
                   : 'linear-gradient(90deg, #666, #888)',
               }}
             />
           </div>
-          {loading && uploadProgress >= 65 && (
+          {loading && uploadProgress >= 50 && (
             <p className="font-body text-xs text-cream-muted mt-2 text-center">
-              AI is generating your preview - this takes about 30-60 seconds
+              AI is generating your preview &mdash; this takes about 30&ndash;60 seconds
             </p>
           )}
         </div>
 
         <button
           onClick={handleSubmit}
-          disabled={loading || files.length < 10 || !email}
+          disabled={loading || photos.length < MIN_PHOTOS || !email}
           className={`w-full py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300
-            ${(!loading && files.length >= 10 && email) ? 'hover:scale-[1.02] hover:shadow-xl cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
+            ${(!loading && photos.length >= MIN_PHOTOS && email) ? 'hover:scale-[1.02] hover:shadow-xl cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
           style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
         >
           {loading ? (
@@ -266,11 +343,11 @@ export default function UploadPage() {
               <span className="w-4 h-4 border-2 border-obsidian/30 border-t-obsidian rounded-full animate-spin" />
               {statusMsg || 'Working...'}
             </span>
-          ) : 'Generate Preview'}
+          ) : 'Generate Free Preview'}
         </button>
 
         <p className="font-body text-xs text-cream-muted text-center mt-4">
-          Secured by Stripe - Your photos are never stored beyond 24 hours
+          Free watermarked preview &mdash; no payment required &middot; Photos permanently deleted within 24 hours
         </p>
       </div>
     </main>

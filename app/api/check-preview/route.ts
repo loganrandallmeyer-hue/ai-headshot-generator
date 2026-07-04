@@ -12,17 +12,26 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing prediction ID' }, { status: 400 })
   }
 
-  const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
-  const prediction = await replicate.predictions.get(predictionId)
+  try {
+    const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
+    const prediction = await replicate.predictions.get(predictionId)
 
-  if (prediction.status === 'succeeded') {
-    const output = prediction.output as string[]
-    return NextResponse.json({ status: 'done', previewUrl: output[0] })
+    if (prediction.status === 'succeeded') {
+      const output = prediction.output as string[]
+      if (!output?.[0]) {
+        return NextResponse.json({ status: 'failed', error: 'No image was generated.' })
+      }
+      return NextResponse.json({ status: 'done', previewUrl: output[0] })
+    }
+
+    if (prediction.status === 'failed' || prediction.status === 'canceled') {
+      return NextResponse.json({ status: 'failed', error: 'Preview generation failed.' })
+    }
+
+    return NextResponse.json({ status: 'pending' })
+  } catch (error) {
+    // Transient Replicate/network error — the client polls again rather than aborting
+    console.error('check-preview error:', error)
+    return NextResponse.json({ status: 'pending', transient: true })
   }
-
-  if (prediction.status === 'failed' || prediction.status === 'canceled') {
-    return NextResponse.json({ status: 'failed', error: 'Preview generation failed.' })
-  }
-
-  return NextResponse.json({ status: 'pending' })
 }

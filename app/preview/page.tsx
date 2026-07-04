@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 const TIERS = [
@@ -33,7 +33,6 @@ const TIERS = [
 ]
 
 function PreviewContent() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [selectedTier, setSelectedTier] = useState<string>('standard')
@@ -44,9 +43,8 @@ function PreviewContent() {
   // Session data passed via URL params + sessionStorage
   const sessionId = searchParams.get('session_id') ?? ''
   const email = searchParams.get('email') ?? ''
+  const predictionId = searchParams.get('prediction_id') ?? ''
   const previewUrl = searchParams.get('preview_url') ? decodeURIComponent(searchParams.get('preview_url')!) : ''
-  const fileUrlsRaw = typeof window !== 'undefined' ? sessionStorage.getItem(`snapshot_urls_${sessionId}`) : null
-  const fileUrls: string[] = fileUrlsRaw ? JSON.parse(fileUrlsRaw) : []
 
   // Draw watermarked preview on canvas
   useEffect(() => {
@@ -102,7 +100,7 @@ function PreviewContent() {
   }, [previewUrl])
 
   const handleCheckout = async () => {
-    if (!email || !fileUrls.length || !sessionId) {
+    if (!email || !predictionId || !sessionId) {
       setError('Session data missing. Please start over.')
       return
     }
@@ -114,9 +112,12 @@ function PreviewContent() {
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, fileUrls, sessionId, tier: selectedTier }),
+        body: JSON.stringify({ email, predictionId, sessionId, tier: selectedTier }),
       })
 
+      if (res.status === 409) {
+        throw new Error('Your preview session has expired. Please start over from the upload page — it only takes a minute.')
+      }
       if (!res.ok) throw new Error('Payment setup failed. Please try again.')
       const { checkoutUrl } = await res.json()
       window.location.href = checkoutUrl
@@ -187,7 +188,7 @@ function PreviewContent() {
               )}
             </div>
             <p className="font-body text-xs text-cream-muted text-center mt-3">
-              🔒 Watermark removed after purchase
+              Watermark removed after purchase
             </p>
           </div>
 
@@ -261,7 +262,7 @@ function PreviewContent() {
             </button>
 
             <p className="font-body text-xs text-cream-muted text-center mt-4">
-              🔒 Secured by Stripe · Headshots delivered to <strong className="text-cream">{email}</strong>
+              Secured by Stripe · Headshots delivered to <strong className="text-cream">{email}</strong>
             </p>
           </div>
         </div>

@@ -2,11 +2,13 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'SnapShot AI — Professional Headshots in Minutes',
-  description: 'Upload 10 photos. Get 50 stunning AI-generated professional headshots delivered to your inbox. No photographer. No studio. Just $24.99.',
+  title: 'SnapShot AI — Professional AI Headshots with a Free Preview',
+  description:
+    'Upload 10–20 selfies and preview your AI-generated professional headshots free. Packages from $9.99, delivered in 30 minutes. One-time payment, photos deleted in 24 hours.',
   openGraph: {
-    title: 'SnapShot AI — Professional Headshots in Minutes',
-    description: 'Upload 10 photos. Get 50 stunning AI-generated professional headshots.',
+    title: 'SnapShot AI — Professional AI Headshots with a Free Preview',
+    description:
+      'Preview your AI headshots free before you pay. Packages from $9.99, delivered in 30 minutes.',
     type: 'website',
   },
 }
