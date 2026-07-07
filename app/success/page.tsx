@@ -45,7 +45,7 @@ function SuccessContent() {
         <ul className="space-y-3">
           {[
             "Check your spam/junk folder if you don't see the email",
-            "Add hello@snapshotai.com to your contacts so it doesn't get filtered",
+            "Add hello@pinelightlabs.com to your contacts so it doesn't get filtered",
             'Your headshots will be delivered as high-resolution downloads',
             'You can use them on LinkedIn, resumes, websites — forever',
           ].map((item) => (

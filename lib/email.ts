@@ -86,7 +86,7 @@ export async function sendHeadshotsEmail(
         </div>
 
         <p style="color:#A89F92; font-size:12px; text-align:center;">
-          Questions? Reply to this email or contact us at hello@snapshotai.com<br />
+          Questions? Reply to this email or contact us at hello@pinelightlabs.com<br />
           © ${new Date().getFullYear()} SnapShot AI
         </p>
 
@@ -95,7 +95,7 @@ export async function sendHeadshotsEmail(
     `
 
     const { error } = await resend.emails.send({
-      from: 'SnapShot AI <hello@snapshotai.com>',
+      from: 'SnapShot AI <hello@pinelightlabs.com>',
       to: toEmail,
       subject: `Your ${attachments.length} professional AI headshots are ready${partLabel}`,
       html,

@@ -53,7 +53,7 @@ export default function TermsPage() {
           ))}
         </div>
         <p className="font-body text-sm text-cream-muted mt-12 pt-8 border-t border-border">
-          Questions? Email <a href="mailto:hello@snapshotai.com" className="text-gold hover:underline">hello@snapshotai.com</a>
+          Questions? Email <a href="mailto:hello@pinelightlabs.com" className="text-gold hover:underline">hello@pinelightlabs.com</a>
         </p>
       </div>
     </main>

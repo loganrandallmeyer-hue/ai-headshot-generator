@@ -25,7 +25,7 @@ const SECTIONS = [
   },
   {
     h: 'Your rights',
-    p: 'You may request deletion of any data we hold about you at any time by emailing hello@snapshotai.com. Since photos are auto-deleted within 24 hours, in most cases the only data we retain is your order record.',
+    p: 'You may request deletion of any data we hold about you at any time by emailing hello@pinelightlabs.com. Since photos are auto-deleted within 24 hours, in most cases the only data we retain is your order record.',
   },
 ]
 
@@ -53,7 +53,7 @@ export default function PrivacyPage() {
           ))}
         </div>
         <p className="font-body text-sm text-cream-muted mt-12 pt-8 border-t border-border">
-          Questions? Email <a href="mailto:hello@snapshotai.com" className="text-gold hover:underline">hello@snapshotai.com</a>
+          Questions? Email <a href="mailto:hello@pinelightlabs.com" className="text-gold hover:underline">hello@pinelightlabs.com</a>
         </p>
       </div>
     </main>

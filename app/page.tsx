@@ -348,7 +348,7 @@ export default function LandingPage() {
               <a href="#faq" className="font-body text-xs text-cream-muted hover:text-cream transition-colors">FAQ</a>
               <Link href="/privacy" className="font-body text-xs text-cream-muted hover:text-cream transition-colors">Privacy</Link>
               <Link href="/terms" className="font-body text-xs text-cream-muted hover:text-cream transition-colors">Terms</Link>
-              <a href="mailto:hello@snapshotai.com" className="font-body text-xs text-cream-muted hover:text-cream transition-colors">Contact</a>
+              <a href="mailto:hello@pinelightlabs.com" className="font-body text-xs text-cream-muted hover:text-cream transition-colors">Contact</a>
             </div>
           </div>
           <p className="font-body text-xs text-cream-muted/60 text-center md:text-left">
