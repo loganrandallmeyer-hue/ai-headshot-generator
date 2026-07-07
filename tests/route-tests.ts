@@ -87,7 +87,7 @@ https.request = function (options: any, ...rest: any[]) {
 
 // ---------------- Replicate + Resend stub (fetch level) ----------------
 const DATA_URLS = [1, 2, 3, 4].map((i) => `data:image/jpeg;base64,PHOTO${i}`)
-interface CreatedPrediction { id: string; numOutputs: number; input: Record<string, unknown> }
+interface CreatedPrediction { id: string; input: Record<string, unknown> }
 const created: CreatedPrediction[] = []
 const sentEmails: { subject: string; to: unknown; attachments: unknown[] }[] = []
 let previewPredictionAgeMs = 0
@@ -102,7 +102,7 @@ globalThis.fetch = (async (url: any, opts: any = {}) => {
     if (u.endsWith('/predictions') && opts.method === 'POST') {
       const body = JSON.parse(opts.body)
       const id = `pred-gen-${created.length}`
-      created.push({ id, numOutputs: body.input.num_outputs, input: body.input })
+      created.push({ id, input: body.input })
       return jsonRes(genPayload(created[created.length - 1]))
     }
     // preview prediction record (photo recovery + freshness checks)
@@ -111,8 +111,8 @@ globalThis.fetch = (async (url: any, opts: any = {}) => {
       return jsonRes({
         id: 'pred-preview',
         status: 'succeeded',
-        input: { input_image: DATA_URLS[0], input_image2: DATA_URLS[1], input_image3: DATA_URLS[2], input_image4: DATA_URLS[3], prompt: 'x' },
-        output: ['https://replicate.delivery/fake/preview.jpg'],
+        input: { input_image: DATA_URLS[0], prompt: 'x' },
+        output: 'https://replicate.delivery/fake/preview.jpg',
         created_at: new Date(Date.now() - previewPredictionAgeMs).toISOString(),
         urls: { get: '', cancel: '' },
       })
@@ -141,7 +141,7 @@ function genPayload(p: CreatedPrediction) {
     status: 'succeeded',
     error: null,
     input: p.input,
-    output: Array.from({ length: p.numOutputs }, (_, i) => `https://replicate.delivery/fake/${p.id}-${i}.jpg`),
+    output: `https://replicate.delivery/fake/${p.id}.jpg`,
     created_at: new Date().toISOString(),
     urls: { get: `https://api.replicate.com/v1/predictions/${p.id}`, cancel: '' },
   }
@@ -198,21 +198,21 @@ async function main() {
   let res: any = await generatePreview(postJson('/api/generate-preview', { fileUrls: DATA_URLS, email: 'not-an-email' }))
   check('rejects invalid email (400)', res.status === 400)
 
-  res = await generatePreview(postJson('/api/generate-preview', { fileUrls: Array(21).fill(DATA_URLS[0]), email: 'a@b.co' }))
-  check('rejects >20 photos (400)', res.status === 400)
+  res = await generatePreview(postJson('/api/generate-preview', { fileUrls: Array(6).fill(DATA_URLS[0]), email: 'a@b.co' }))
+  check('rejects >5 photos (400)', res.status === 400)
 
   res = await generatePreview(postJson('/api/generate-preview', { fileUrls: ['https://evil.com/x.jpg'], email: 'a@b.co' }))
   check('rejects non-data-URL photo (400)', res.status === 400)
 
-  res = await generatePreview(postJson('/api/generate-preview', { fileUrls: ['data:image/jpeg;base64,' + 'A'.repeat(500 * 1024)], email: 'a@b.co' }))
+  res = await generatePreview(postJson('/api/generate-preview', { fileUrls: ['data:image/jpeg;base64,' + 'A'.repeat(1_600_000)], email: 'a@b.co' }))
   check('rejects oversized photo (400)', res.status === 400)
 
   created.length = 0
   res = await generatePreview(postJson('/api/generate-preview', { fileUrls: DATA_URLS, email: 'a@b.co' }))
   const previewJson = await res.json()
   check('valid request → 200 + predictionId + sessionId', res.status === 200 && !!previewJson.predictionId && !!previewJson.sessionId)
-  check('preview uses all 4 reference photos', created[0]?.input.input_image4 === DATA_URLS[3])
-  check('preview generates exactly 1 image', created[0]?.numOutputs === 1)
+  check('preview uses the uploaded photo', created[0]?.input.input_image === DATA_URLS[0])
+  check('preview prompt demands identity preservation', String(created[0]?.input.prompt).includes('identity'))
 
   // ---------- /api/check-preview ----------
   console.log('\n/api/check-preview:')
@@ -274,8 +274,8 @@ async function main() {
   j = await res.json()
   check('fresh order → fulfilled (200 success)', res.status === 200 && j.success === true, JSON.stringify(j))
   check('delivered 30 headshots (premium)', j.count === 30, `got ${j.count}`)
-  check('photos recovered from preview prediction', created.every((c) => c.input.input_image === DATA_URLS[0] && c.input.input_image4 === DATA_URLS[3]))
-  check('every generation job ≤ 4 outputs', created.every((c) => c.numOutputs <= 4))
+  check('photo recovered from preview prediction', created.every((c) => c.input.input_image === DATA_URLS[0]))
+  check('30 separate predictions created', created.length === 30, `got ${created.length}`)
   check('email sent with 30 attachments', sentEmails.length === 1 && sentEmails[0].attachments.length === 30, `emails=${sentEmails.length}`)
   check('PaymentIntent marked fulfilled', piMetadata.pi_fresh.fulfilled === 'true')
 

@@ -4,7 +4,7 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'SnapShot AI — Professional AI Headshots with a Free Preview',
   description:
-    'Upload 10–20 selfies and preview your AI-generated professional headshots free. Packages from $9.99, delivered in 30 minutes. One-time payment, photos deleted in 24 hours.',
+    'Upload one photo and preview your AI-generated professional headshots free. Packages from $9.99, delivered in 30 minutes. One-time payment, photos deleted in 24 hours.',
   openGraph: {
     title: 'SnapShot AI — Professional AI Headshots with a Free Preview',
     description:

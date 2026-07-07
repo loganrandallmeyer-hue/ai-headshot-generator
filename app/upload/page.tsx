@@ -9,8 +9,8 @@ interface PhotoItem {
   preview: string // object URL for the thumbnail grid
 }
 
-const MIN_PHOTOS = 10
-const MAX_PHOTOS = 20
+const MIN_PHOTOS = 1
+const MAX_PHOTOS = 5
 
 export default function UploadPage() {
   const [photos, setPhotos] = useState<PhotoItem[]>([])
@@ -66,12 +66,14 @@ export default function UploadPage() {
       img.onload = () => {
         try {
           const canvas = document.createElement('canvas')
-          const MAX = 400
+          // High resolution matters: the AI edits this exact photo,
+          // so facial detail in = facial detail out.
+          const MAX = 1024
           const scale = Math.min(MAX / img.width, MAX / img.height, 1)
           canvas.width = Math.round(img.width * scale)
           canvas.height = Math.round(img.height * scale)
           canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
-          resolve(canvas.toDataURL('image/jpeg', 0.65))
+          resolve(canvas.toDataURL('image/jpeg', 0.85))
         } catch (e) {
           reject(e)
         } finally {
@@ -87,7 +89,7 @@ export default function UploadPage() {
 
   const handleSubmit = async () => {
     if (photos.length < MIN_PHOTOS) {
-      setError(`Please upload at least ${MIN_PHOTOS} photos for best results.`)
+      setError('Please upload a photo of yourself.')
       return
     }
     if (!email || !email.includes('@')) {
@@ -192,8 +194,9 @@ export default function UploadPage() {
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Step 1 of 2</p>
           <h1 className="font-display text-5xl font-light text-cream mb-4">Upload Your Photos</h1>
           <p className="font-body text-sm text-cream-muted leading-relaxed">
-            Upload <strong className="text-cream">10&ndash;20 clear selfies</strong> for the best results.
-            Different angles and expressions give you more variety.
+            Upload <strong className="text-cream">one clear, well-lit photo</strong> of yourself &mdash;
+            our AI transforms it into professional headshots while keeping your exact likeness.
+            Add up to 4 spares in case you want to try a different shot.
           </p>
         </div>
 
@@ -216,10 +219,10 @@ export default function UploadPage() {
               ),
             },
             {
-              tip: 'Different angles',
+              tip: 'Face fills the frame',
               icon: (
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 12a9 9 0 1 1-9-9" /><path d="M21 3v6h-6" />
+                  <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="12" cy="10" r="3" /><path d="M6 21c0-3 2.7-5 6-5s6 2 6 5" />
                 </svg>
               ),
             },
@@ -258,7 +261,7 @@ export default function UploadPage() {
           <div className="flex items-center justify-between mb-4">
             <span className="font-body text-sm text-cream-muted">
               {photos.length} photo{photos.length !== 1 ? 's' : ''} selected
-              {photos.length < MIN_PHOTOS && <span className="text-gold ml-1">(need {MIN_PHOTOS - photos.length} more)</span>}
+              {photos.length > 1 && <span className="text-cream-muted/60 ml-1">(we use the first — remove any to reorder)</span>}
             </span>
             <button onClick={clearAll} className="font-body text-xs text-cream-muted hover:text-gold transition-colors">
               Clear all
@@ -310,7 +313,7 @@ export default function UploadPage() {
             {loading ? (
               <><span>{statusMsg}</span><span>{uploadProgress}%</span></>
             ) : (
-              <><span>Photos selected</span><span>{photos.length}/{MIN_PHOTOS} minimum</span></>
+              <><span>Photos selected</span><span>{photos.length > 0 ? 'ready' : 'add a photo to start'}</span></>
             )}
           </div>
           <div className="h-1.5 rounded-full bg-charcoal overflow-hidden">

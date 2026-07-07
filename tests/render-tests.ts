@@ -65,6 +65,7 @@ const upload = render('upload', '../app/upload/page')
 check('renders', upload.includes('Upload Your Photos'))
 check('free-preview CTA present', upload.includes('Generate Free Preview'))
 check('photo tips present', upload.includes('Good natural lighting'))
+check('one-photo flow copy present', upload.includes('one clear, well-lit photo'))
 check('deletion promise present', upload.includes('deleted within 24 hours'))
 
 console.log('\nPreview page (/preview):')

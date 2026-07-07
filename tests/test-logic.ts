@@ -5,7 +5,7 @@
 process.env.REPLICATE_API_TOKEN = 'test-token'
 process.env.RESEND_API_KEY = 'test-key'
 
-import { generateHeadshots, buildPhotoMakerInput, TIERS } from '../lib/replicate'
+import { generateHeadshots, buildHeadshotInput, normalizeOutput, TIERS } from '../lib/replicate'
 import { sendHeadshotsEmail } from '../lib/email'
 
 let failures = 0
@@ -15,7 +15,7 @@ function check(name: string, cond: boolean, detail = '') {
 }
 
 // ---------- fetch stub ----------
-interface CreatedPrediction { id: string; numOutputs: number; prompt: string; input: Record<string, unknown>; fail: boolean }
+interface CreatedPrediction { id: string; prompt: string; input: Record<string, unknown>; fail: boolean }
 const created: CreatedPrediction[] = []
 let failNextNPredictions = 0
 const sentEmails: { subject: string; attachments: { filename: string; content: unknown }[] }[] = []
@@ -31,7 +31,7 @@ globalThis.fetch = (async (url: any, opts: any = {}) => {
     const id = `pred-${created.length}`
     const fail = failNextNPredictions > 0
     if (fail) failNextNPredictions--
-    created.push({ id, numOutputs: body.input.num_outputs, prompt: body.input.prompt, input: body.input, fail })
+    created.push({ id, prompt: body.input.prompt, input: body.input, fail })
     return jsonRes(predictionPayload(created[created.length - 1]))
   }
   // Replicate: get prediction
@@ -59,7 +59,7 @@ function predictionPayload(p: CreatedPrediction) {
     status: p.fail ? 'failed' : 'succeeded',
     error: p.fail ? 'boom' : null,
     input: p.input,
-    output: p.fail ? null : Array.from({ length: p.numOutputs }, (_, i) => `https://replicate.delivery/fake/${p.id}-${i}.jpg`),
+    output: p.fail ? null : `https://replicate.delivery/fake/${p.id}.jpg`,
     created_at: new Date().toISOString(),
     urls: { get: `https://api.replicate.com/v1/predictions/${p.id}`, cancel: '' },
   }
@@ -71,32 +71,31 @@ function jsonRes(obj: unknown) {
 const IMGS = ['data:image/jpeg;base64,AAA1', 'data:image/jpeg;base64,AAA2', 'data:image/jpeg;base64,AAA3', 'data:image/jpeg;base64,AAA4']
 
 async function main() {
-  // ---------- buildPhotoMakerInput ----------
-  console.log('\nbuildPhotoMakerInput:')
-  const inp = buildPhotoMakerInput(IMGS, 'white background', 6, 50)
-  check('caps num_outputs at 4', inp.num_outputs === 4)
-  check('attaches all 4 reference photos', inp.input_image === IMGS[0] && inp.input_image2 === IMGS[1] && inp.input_image3 === IMGS[2] && inp.input_image4 === IMGS[3])
-  const inp1 = buildPhotoMakerInput([IMGS[0]], 'x', 1, 30)
-  check('single photo → no extra inputs', !('input_image2' in inp1))
+  // ---------- buildHeadshotInput / normalizeOutput ----------
+  console.log('\nbuildHeadshotInput:')
+  const inp = buildHeadshotInput(IMGS[0], 0)
+  check('uses the source photo', inp.input_image === IMGS[0])
+  check('prompt demands identity preservation', String(inp.prompt).includes('identity'))
+  check('prompt index wraps safely', String(buildHeadshotInput(IMGS[0], 7).prompt).length > 0)
+  check('normalizes string output', normalizeOutput('https://x/a.jpg').length === 1)
+  check('normalizes array output', normalizeOutput(['https://x/a.jpg', 'https://x/b.jpg']).length === 2)
 
   // ---------- premium tier: 30 images ----------
   console.log('\ngenerateHeadshots premium (30):')
   created.length = 0
   const out30 = await generateHeadshots(IMGS, TIERS.premium.count)
   check('returns exactly 30 images', out30.length === 30, `got ${out30.length}`)
-  check('every prediction ≤ 4 outputs (PhotoMaker max)', created.every((c) => c.numOutputs <= 4))
+  check('creates exactly 30 predictions (1 image each)', created.length === 30, `got ${created.length}`)
   const styles30 = new Set(created.map((c) => c.prompt))
-  check('uses 5 distinct styles', styles30.size === 5, `got ${styles30.size}`)
-  const totalRequested = created.reduce((s, c) => s + c.numOutputs, 0)
-  check('requests exactly 30 outputs total', totalRequested === 30, `got ${totalRequested}`)
-  check('reference photos attached to every job', created.every((c) => c.input.input_image4 === IMGS[3]))
+  check('cycles 5 distinct styles', styles30.size === 5, `got ${styles30.size}`)
+  check('every job uses the source photo', created.every((c) => c.input.input_image === IMGS[0]))
 
   // ---------- standard tier: 15 images ----------
   console.log('\ngenerateHeadshots standard (15):')
   created.length = 0
   const out15 = await generateHeadshots(IMGS, TIERS.standard.count)
   check('returns exactly 15 images', out15.length === 15, `got ${out15.length}`)
-  check('uses 3 distinct styles', new Set(created.map((c) => c.prompt)).size === 3)
+  check('cycles 3 distinct styles', new Set(created.map((c) => c.prompt)).size === 3)
 
   // ---------- basic tier: 1 image ----------
   console.log('\ngenerateHeadshots basic (1):')
@@ -110,7 +109,7 @@ async function main() {
   created.length = 0
   failNextNPredictions = 1
   const outPartial = await generateHeadshots(IMGS, 30)
-  check('tolerates one failed job, delivers the rest', outPartial.length >= 26, `got ${outPartial.length}`)
+  check('tolerates one failed job, delivers the rest', outPartial.length === 29, `got ${outPartial.length}`)
 
   // ---------- total failure ----------
   created.length = 0

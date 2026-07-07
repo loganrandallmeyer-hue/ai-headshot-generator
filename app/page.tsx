@@ -44,8 +44,8 @@ const TRUST_POINTS = [
 const STEPS = [
   {
     number: '01',
-    title: 'Upload your photos',
-    desc: 'Share 10–20 clear selfies taken in good lighting. Any phone camera works — no professional equipment needed.',
+    title: 'Upload one photo',
+    desc: 'One clear, well-lit photo is all it takes. Any phone camera works — no professional equipment needed.',
   },
   {
     number: '02',
@@ -71,11 +71,11 @@ const STYLES = [
 const FAQS = [
   {
     q: 'How realistic do the headshots look?',
-    a: 'Our AI preserves your actual facial features and places you in studio-quality lighting and settings. You judge for yourself: every order starts with a free watermarked preview generated from your own photos — before any payment.',
+    a: 'Very — our AI edits your actual photo rather than generating a lookalike, so your exact facial features are preserved. You judge for yourself: every order starts with a free watermarked preview generated from your own photo, before any payment.',
   },
   {
     q: 'What photos should I upload?',
-    a: 'Clear, well-lit selfies where your face is fully visible. Different angles and expressions give better variety. Avoid sunglasses, hats, or heavy shadows.',
+    a: 'One clear, well-lit photo where your face is fully visible and fills a good part of the frame. Avoid sunglasses, hats, or heavy shadows. Our AI transforms your actual photo, so the better the input, the better every headshot.',
   },
   {
     q: 'How long does it take?',
@@ -136,7 +136,7 @@ export default function LandingPage() {
         </h1>
 
         <p className="animate-fade-up delay-200 font-body text-lg md:text-xl text-cream-muted max-w-xl mx-auto mb-10 leading-relaxed">
-          Upload a few selfies. Preview your AI-generated headshots free — then pick a package from $9.99. One-time payment, no subscription.
+          Upload one clear photo. Preview your AI-generated headshots free — then pick a package from $9.99. One-time payment, no subscription.
         </p>
 
         <div className="animate-fade-up delay-300 flex flex-col sm:flex-row items-center gap-5">

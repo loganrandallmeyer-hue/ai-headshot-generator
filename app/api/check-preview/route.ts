@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Replicate from 'replicate'
+import { normalizeOutput } from '@/lib/replicate'
 
 export const runtime = 'nodejs'
 export const maxDuration = 15
@@ -17,11 +18,11 @@ export async function GET(req: NextRequest) {
     const prediction = await replicate.predictions.get(predictionId)
 
     if (prediction.status === 'succeeded') {
-      const output = prediction.output as string[]
-      if (!output?.[0]) {
+      const urls = normalizeOutput(prediction.output)
+      if (!urls[0]) {
         return NextResponse.json({ status: 'failed', error: 'No image was generated.' })
       }
-      return NextResponse.json({ status: 'done', previewUrl: output[0] })
+      return NextResponse.json({ status: 'done', previewUrl: urls[0] })
     }
 
     if (prediction.status === 'failed' || prediction.status === 'canceled') {
