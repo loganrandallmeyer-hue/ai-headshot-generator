@@ -5,15 +5,28 @@ import Replicate from 'replicate'
 // One output per prediction, ~$0.04/image.
 export const HEADSHOT_MODEL = 'black-forest-labs/flux-kontext-pro'
 
+/**
+ * Replicate client that BYPASSES Next.js's fetch data cache.
+ * Next caches GET responses by default, which froze status polling:
+ * the first poll (mid-generation) was cached and replayed forever,
+ * so completed predictions never appeared as done.
+ */
+export function newReplicate(): Replicate {
+  return new Replicate({
+    auth: process.env.REPLICATE_API_TOKEN!,
+    fetch: (url: any, init?: any) => fetch(url, { ...init, cache: 'no-store' }),
+  })
+}
+
 const IDENTITY_GUARD =
-  "Preserve this exact person's face, identity, skin tone, and hair. Do not change their facial features."
+  "Keep this exact person's identity completely unchanged: same face, same facial structure, same gender, same jawline, same nose, same eyes, same lips, same skin tone and natural skin texture, same hairstyle. Do NOT add makeup, lip gloss, or lipstick. Do NOT smooth or retouch the skin. Do NOT feminize, masculinize, beautify, or slim the face. The person must be instantly recognizable as the same person from the original photo."
 
 const HEADSHOT_PROMPTS = [
-  `Transform this into a professional corporate headshot: business attire, clean white studio background, soft even studio lighting, sharp focus, confident friendly expression. ${IDENTITY_GUARD}`,
-  `Transform this into a professional headshot: business attire, blurred modern office background, natural professional lighting, sharp focus. ${IDENTITY_GUARD}`,
-  `Transform this into a professional headshot: smart-casual attire, outdoor background with soft bokeh, warm natural golden-hour light, sharp focus. ${IDENTITY_GUARD}`,
-  `Transform this into an executive portrait: dark business attire, dark gradient studio background, dramatic professional rim lighting, sharp focus. ${IDENTITY_GUARD}`,
-  `Transform this into a professional headshot: business-casual attire, light grey seamless studio background, soft diffused lighting, sharp focus, approachable expression. ${IDENTITY_GUARD}`,
+  `Change the background to a clean white studio backdrop, change the clothing to professional business attire, and apply soft even studio lighting, sharp focus, like a corporate headshot. ${IDENTITY_GUARD}`,
+  `Change the background to a blurred modern office and change the clothing to professional business attire, with natural professional lighting and sharp focus. ${IDENTITY_GUARD}`,
+  `Change the background to an outdoor scene with soft bokeh and change the clothing to smart-casual attire, with warm natural light and sharp focus. ${IDENTITY_GUARD}`,
+  `Change the background to a dark gradient studio backdrop and change the clothing to dark business attire, with professional rim lighting and sharp focus, like an executive portrait. ${IDENTITY_GUARD}`,
+  `Change the background to a light grey seamless studio backdrop and change the clothing to business-casual attire, with soft diffused lighting and sharp focus. ${IDENTITY_GUARD}`,
 ]
 
 export const TIERS = {
@@ -49,7 +62,7 @@ export function normalizeOutput(output: unknown): string[] {
  * it's echoed back in prediction.input, so we never store it ourselves.
  */
 export async function getInputImagesFromPrediction(predictionId: string): Promise<string[]> {
-  const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
+  const replicate = newReplicate()
   const prediction = await replicate.predictions.get(predictionId)
   const input = (prediction.input ?? {}) as Record<string, unknown>
   const image = input.input_image
@@ -65,7 +78,7 @@ export async function getInputImagesFromPrediction(predictionId: string): Promis
  * as long as at least half the set generates.
  */
 export async function generateHeadshots(imageUrls: string[], count: number = 30): Promise<string[]> {
-  const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
+  const replicate = newReplicate()
   const sourceImage = imageUrls[0]
   const styleCount = count <= 1 ? 1 : count <= 15 ? 3 : HEADSHOT_PROMPTS.length
 

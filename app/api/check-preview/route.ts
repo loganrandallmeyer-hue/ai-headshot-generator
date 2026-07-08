@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Replicate from 'replicate'
-import { normalizeOutput } from '@/lib/replicate'
+import { normalizeOutput, newReplicate } from '@/lib/replicate'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 export const maxDuration = 15
 
 export async function GET(req: NextRequest) {
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
+    const replicate = newReplicate()
     const prediction = await replicate.predictions.get(predictionId)
 
     if (prediction.status === 'succeeded') {

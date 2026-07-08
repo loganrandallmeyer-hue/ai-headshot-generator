@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import Replicate from 'replicate'
-import { TIERS, Tier } from '@/lib/replicate'
+import { TIERS, Tier, newReplicate } from '@/lib/replicate'
 
 // Replicate auto-deletes API prediction inputs after 1 hour. We only sell
 // while the customer's photos are still recoverable: the preview must be
@@ -29,7 +28,7 @@ export async function POST(req: NextRequest) {
     const selectedTier = TIERS[tier as Tier]
 
     // Confirm the preview prediction still holds the customer's photos
-    const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
+    const replicate = newReplicate()
     const prediction = await replicate.predictions.get(predictionId)
     const input = (prediction.input ?? {}) as Record<string, unknown>
     const age = Date.now() - new Date(prediction.created_at).getTime()

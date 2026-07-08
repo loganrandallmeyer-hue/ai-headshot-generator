@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Replicate from 'replicate'
 import { randomUUID } from 'crypto'
-import { HEADSHOT_MODEL, buildHeadshotInput } from '@/lib/replicate'
+import { HEADSHOT_MODEL, buildHeadshotInput, newReplicate } from '@/lib/replicate'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -36,7 +35,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! })
+    const replicate = newReplicate()
     const sessionId = randomUUID()
 
     const prediction = await replicate.predictions.create({
