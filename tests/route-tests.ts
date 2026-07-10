@@ -26,6 +26,8 @@ const piMetadata: Record<string, Record<string, string>> = {
   pi_dup: { fulfilled: 'true' },
   pi_fresh: {},
 }
+// Checkout Session metadata — fulfillment state for $0 orders (no PaymentIntent)
+const csMetadata: Record<string, Record<string, string>> = {}
 
 function fakeStripeResponse(method: string, path: string, body: string): { status: number; json: unknown } {
   stripeCalls.push({ method, path, body })
@@ -42,6 +44,20 @@ function fakeStripeResponse(method: string, path: string, body: string): { statu
       if (m) md[m[1]] = v
     })
     return { status: 200, json: { id: piGet[1], object: 'payment_intent', metadata: md } }
+  }
+  const csById = path.match(/^\/v1\/checkout\/sessions\/([^/?]+)$/)
+  if (csById && method === 'GET') {
+    return { status: 200, json: { id: csById[1], object: 'checkout.session', metadata: csMetadata[csById[1]] ?? {} } }
+  }
+  if (csById && method === 'POST') {
+    // metadata update — merge form-encoded metadata[...] keys
+    const params = new URLSearchParams(body)
+    const md = csMetadata[csById[1]] ?? (csMetadata[csById[1]] = {})
+    params.forEach((v, k) => {
+      const m = k.match(/^metadata\[(.+)\]$/)
+      if (m) md[m[1]] = v
+    })
+    return { status: 200, json: { id: csById[1], object: 'checkout.session', metadata: md } }
   }
   if (path.startsWith('/v1/checkout/sessions') && method === 'POST') {
     return { status: 200, json: { id: 'cs_test_123', object: 'checkout.session', url: 'https://checkout.stripe.com/c/pay/cs_test_123' } }
@@ -177,16 +193,18 @@ function signedWebhookRequest(eventBody: string) {
   })
 }
 
-const checkoutEvent = (pi: string) =>
+const checkoutEvent = (pi: string | null, opts: { sessionId?: string; paymentStatus?: string } = {}) =>
   JSON.stringify({
     id: 'evt_test',
     object: 'event',
     type: 'checkout.session.completed',
     data: {
       object: {
-        id: 'cs_test_123',
+        id: opts.sessionId ?? 'cs_test_123',
         object: 'checkout.session',
         payment_intent: pi,
+        // real Stripe sessions always carry payment_status; $0 coupon orders get 'no_payment_required'
+        payment_status: opts.paymentStatus ?? (pi ? 'paid' : 'no_payment_required'),
         metadata: { session_id: 'sess-1', email: 'buyer@example.com', tier: 'premium', prediction_id: 'pred-preview' },
       },
     },
@@ -285,6 +303,45 @@ async function main() {
   res = await webhook(signedWebhookRequest(checkoutEvent('pi_fresh')))
   j = await res.json()
   check('Stripe retry after success → no double delivery', j.duplicate === true && sentEmails.length === 0)
+
+  // ---------- $0 order (100%-off coupon): session has NO PaymentIntent ----------
+  console.log('\n/api/webhook ($0 coupon order — no PaymentIntent):')
+  created.length = 0
+  sentEmails.length = 0
+  res = await webhook(signedWebhookRequest(checkoutEvent(null, { sessionId: 'cs_free_1' })))
+  j = await res.json()
+  check('free order → fulfilled (200 success)', res.status === 200 && j.success === true, JSON.stringify(j))
+  check('free order: headshots emailed', sentEmails.length === 1 && created.length === 30)
+  check('fulfilled state stored on session metadata', csMetadata.cs_free_1?.fulfilled === 'true')
+
+  created.length = 0
+  sentEmails.length = 0
+  res = await webhook(signedWebhookRequest(checkoutEvent(null, { sessionId: 'cs_free_1' })))
+  j = await res.json()
+  check('Stripe retry of free order → no double delivery', j.duplicate === true && created.length === 0 && sentEmails.length === 0)
+
+  // a live claim (fulfillment in progress) must block concurrent retries
+  csMetadata.cs_free_2 = { fulfillment_claimed_at: String(Date.now()) }
+  created.length = 0
+  sentEmails.length = 0
+  res = await webhook(signedWebhookRequest(checkoutEvent(null, { sessionId: 'cs_free_2' })))
+  j = await res.json()
+  check('concurrent retry during active claim → skipped', j.inProgress === true && sentEmails.length === 0)
+
+  // ...but an EXPIRED claim (crashed run) must be retryable
+  csMetadata.cs_free_3 = { fulfillment_claimed_at: String(Date.now() - 11 * 60 * 1000) }
+  created.length = 0
+  sentEmails.length = 0
+  res = await webhook(signedWebhookRequest(checkoutEvent(null, { sessionId: 'cs_free_3' })))
+  j = await res.json()
+  check('expired claim → retry fulfills', j.success === true && sentEmails.length === 1)
+
+  // sessions that are neither paid nor no_payment_required must not fulfill
+  created.length = 0
+  sentEmails.length = 0
+  res = await webhook(signedWebhookRequest(checkoutEvent('pi_unpaid', { paymentStatus: 'unpaid' })))
+  j = await res.json()
+  check('unpaid session → not fulfilled', res.status === 200 && j.success === undefined && sentEmails.length === 0)
 
   console.log(failures === 0 ? '\nALL ROUTE TESTS PASSED' : `\n${failures} TEST(S) FAILED`)
   process.exit(failures === 0 ? 0 : 1)

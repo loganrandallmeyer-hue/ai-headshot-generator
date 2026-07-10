@@ -9,6 +9,17 @@ export const maxDuration = 300 // parallel AI generation + email, worst case ~2-
 // How long a fulfillment "claim" is honored before a Stripe retry may re-attempt
 const CLAIM_TTL_MS = 10 * 60 * 1000
 
+// stripe-node v14 predates checkout.sessions.update() (added alongside API
+// version 2024-09-30), but the POST /v1/checkout/sessions/:id endpoint accepts
+// metadata updates. Expose it via the SDK's documented custom-resource
+// mechanism rather than upgrading the dependency.
+const CheckoutSessionUpdater = Stripe.StripeResource.extend({
+  update: Stripe.StripeResource.method<Stripe.Checkout.Session>({
+    method: 'POST',
+    fullPath: '/v1/checkout/sessions/{id}',
+  }),
+})
+
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: '2023-10-16',
@@ -45,26 +56,58 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing metadata' }, { status: 400 })
   }
 
+  // Only fulfill settled orders: 'paid' for normal orders, and
+  // 'no_payment_required' for $0 orders (e.g. 100%-off promotion codes).
+  if (
+    session.payment_status !== 'paid' &&
+    session.payment_status !== 'no_payment_required'
+  ) {
+    console.log(`Session ${session.id} payment_status=${session.payment_status} — not fulfillable, skipping`)
+    return NextResponse.json({ received: true })
+  }
+
   // --- Idempotency: Stripe retries webhooks; never generate or email twice ---
+  // Fulfillment state lives on the PaymentIntent when one exists (paid orders).
+  // $0 orders (100%-off promo codes) have NO PaymentIntent, so their state
+  // lives on the Checkout Session's own metadata instead, keyed by session.id.
   const paymentIntentId = typeof session.payment_intent === 'string'
     ? session.payment_intent
     : session.payment_intent?.id
 
-  if (paymentIntentId) {
-    const pi = await stripe.paymentIntents.retrieve(paymentIntentId)
-    if (pi.metadata.fulfilled === 'true') {
-      console.log(`Order ${paymentIntentId} already fulfilled — skipping duplicate webhook`)
-      return NextResponse.json({ received: true, duplicate: true })
+  const orderId = paymentIntentId ?? session.id
+
+  // Retries redeliver the ORIGINAL event payload, so session.metadata in the
+  // event is a stale snapshot — always re-read current state from the API.
+  const readFulfillmentState = async (): Promise<Record<string, string>> => {
+    if (paymentIntentId) {
+      const pi = await stripe.paymentIntents.retrieve(paymentIntentId)
+      return pi.metadata
     }
-    const claimedAt = Number(pi.metadata.fulfillment_claimed_at || 0)
-    if (claimedAt && Date.now() - claimedAt < CLAIM_TTL_MS) {
-      console.log(`Order ${paymentIntentId} fulfillment in progress — skipping concurrent webhook`)
-      return NextResponse.json({ received: true, inProgress: true })
-    }
-    await stripe.paymentIntents.update(paymentIntentId, {
-      metadata: { fulfillment_claimed_at: String(Date.now()) },
-    })
+    const fresh = await stripe.checkout.sessions.retrieve(session.id)
+    return fresh.metadata || {}
   }
+
+  // Stripe merges metadata per-key, so this never clobbers email/tier/prediction_id.
+  const sessionUpdater = new CheckoutSessionUpdater(stripe)
+  const writeFulfillmentState = async (state: Record<string, string>) => {
+    if (paymentIntentId) {
+      await stripe.paymentIntents.update(paymentIntentId, { metadata: state })
+    } else {
+      await sessionUpdater.update(session.id, { metadata: state })
+    }
+  }
+
+  const state = await readFulfillmentState()
+  if (state.fulfilled === 'true') {
+    console.log(`Order ${orderId} already fulfilled — skipping duplicate webhook`)
+    return NextResponse.json({ received: true, duplicate: true })
+  }
+  const claimedAt = Number(state.fulfillment_claimed_at || 0)
+  if (claimedAt && Date.now() - claimedAt < CLAIM_TTL_MS) {
+    console.log(`Order ${orderId} fulfillment in progress — skipping concurrent webhook`)
+    return NextResponse.json({ received: true, inProgress: true })
+  }
+  await writeFulfillmentState({ fulfillment_claimed_at: String(Date.now()) })
 
   try {
     // Recover the customer's photos from the preview prediction record —
@@ -82,21 +125,16 @@ export async function POST(req: NextRequest) {
     await sendHeadshotsEmail(email, headshots)
     console.log(`Headshots delivered to ${email}`)
 
-    if (paymentIntentId) {
-      await stripe.paymentIntents.update(paymentIntentId, {
-        metadata: { fulfilled: 'true', delivered_count: String(headshots.length) },
-      })
-    }
+    await writeFulfillmentState({
+      fulfilled: 'true',
+      delivered_count: String(headshots.length),
+    })
 
     return NextResponse.json({ success: true, count: headshots.length })
   } catch (error) {
     console.error('Generation/email error:', error)
     // Release the claim so Stripe's automatic retry can attempt again
-    if (paymentIntentId) {
-      await stripe.paymentIntents.update(paymentIntentId, {
-        metadata: { fulfillment_claimed_at: '' },
-      }).catch(() => {})
-    }
+    await writeFulfillmentState({ fulfillment_claimed_at: '' }).catch(() => {})
     return NextResponse.json({ error: 'Processing failed' }, { status: 500 })
   }
 }
