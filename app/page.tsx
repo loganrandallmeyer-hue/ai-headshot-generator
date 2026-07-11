@@ -159,8 +159,7 @@ export default function LandingPage() {
             <div className="animate-fade-up delay-300 flex flex-col sm:flex-row items-center lg:items-start gap-4">
               <Link
                 href="/upload"
-                className="gold-glow inline-flex items-center gap-3 px-8 py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
+                className="bg-grad-gold gold-glow inline-flex items-center gap-3 px-8 py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 <span>Try It Free — See Your Preview</span>
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -202,8 +201,7 @@ export default function LandingPage() {
                       <PortraitGlyph tone={card.tone} />
                     </div>
                     <span
-                      className={`absolute top-3 left-3 px-2 py-0.5 rounded-full text-[9px] font-body font-semibold tracking-wider uppercase ${card.dim ? 'bg-obsidian/70 text-cream-muted' : 'text-obsidian'}`}
-                      style={card.dim ? undefined : { background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
+                      className={`absolute top-3 left-3 px-2 py-0.5 rounded-full text-[9px] font-body font-semibold tracking-wider uppercase ${card.dim ? 'bg-obsidian/70 text-cream-muted' : 'bg-grad-gold text-obsidian'}`}
                     >
                       {card.tag}
                     </span>
@@ -356,8 +354,7 @@ export default function LandingPage() {
 
             <Reveal delay={100}>
               <div className="relative rounded-2xl p-1 h-full" style={{ background: 'linear-gradient(135deg, #C9A550, #8B6914, #C9A550)' }}>
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[11px] font-body font-semibold tracking-wider uppercase text-obsidian z-10"
-                  style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}>
+                <div className="bg-grad-gold absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[11px] font-body font-semibold tracking-wider uppercase text-obsidian z-10">
                   Most Popular
                 </div>
                 <div className="rounded-[14px] bg-charcoal p-8 flex flex-col h-full">
@@ -371,8 +368,7 @@ export default function LandingPage() {
                       </li>
                     ))}
                   </ul>
-                  <Link href="/upload" className="block w-full py-3 rounded-full font-body font-medium text-obsidian text-center transition-all duration-300 hover:scale-[1.02]"
-                    style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}>
+                  <Link href="/upload" className="bg-grad-gold block w-full py-3 rounded-full font-body font-medium text-obsidian text-center transition-all duration-300 hover:scale-[1.02]">
                     Start Free Preview
                   </Link>
                 </div>
@@ -451,8 +447,7 @@ export default function LandingPage() {
           <p className="font-body text-sm text-cream-muted mb-8">Free preview · From $9.99 · Delivered in 30 minutes</p>
           <Link
             href="/upload"
-            className="gold-glow inline-flex items-center gap-3 px-10 py-5 rounded-full font-body font-medium text-obsidian text-lg transition-all duration-300 hover:scale-105"
-            style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
+            className="bg-grad-gold gold-glow inline-flex items-center gap-3 px-10 py-5 rounded-full font-body font-medium text-obsidian text-lg transition-all duration-300 hover:scale-105"
           >
             Start My Free Preview
           </Link>

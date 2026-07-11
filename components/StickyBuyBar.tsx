@@ -25,8 +25,7 @@ export default function StickyBuyBar() {
     >
       <Link
         href="/upload"
-        className="flex items-center justify-between gap-3 px-5 py-3.5 rounded-full text-obsidian font-body font-medium shadow-xl"
-        style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
+        className="bg-grad-gold flex items-center justify-between gap-3 px-5 py-3.5 rounded-full text-obsidian font-body font-medium shadow-xl"
       >
         <span className="flex flex-col leading-tight">
           <span className="text-[11px] opacity-80 tracking-wide">Free preview · From $9.99</span>

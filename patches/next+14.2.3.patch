@@ -1,0 +1,42 @@
+diff --git a/node_modules/next/dist/build/entries.js b/node_modules/next/dist/build/entries.js
+index bd32c43..d952002 100644
+--- a/node_modules/next/dist/build/entries.js
++++ b/node_modules/next/dist/build/entries.js
+@@ -170,13 +170,13 @@ function getPageFromPath(pagePath, pageExtensions) {
+ }
+ function getPageFilePath({ absolutePagePath, pagesDir, appDir, rootDir }) {
+     if (absolutePagePath.startsWith(_constants.PAGES_DIR_ALIAS) && pagesDir) {
+-        return absolutePagePath.replace(_constants.PAGES_DIR_ALIAS, pagesDir);
++        return absolutePagePath.replace(_constants.PAGES_DIR_ALIAS, () => pagesDir);
+     }
+     if (absolutePagePath.startsWith(_constants.APP_DIR_ALIAS) && appDir) {
+-        return absolutePagePath.replace(_constants.APP_DIR_ALIAS, appDir);
++        return absolutePagePath.replace(_constants.APP_DIR_ALIAS, () => appDir);
+     }
+     if (absolutePagePath.startsWith(_constants.ROOT_DIR_ALIAS)) {
+-        return absolutePagePath.replace(_constants.ROOT_DIR_ALIAS, rootDir);
++        return absolutePagePath.replace(_constants.ROOT_DIR_ALIAS, () => rootDir);
+     }
+     return require.resolve(absolutePagePath);
+ }
+diff --git a/node_modules/next/dist/esm/build/entries.js b/node_modules/next/dist/esm/build/entries.js
+index 64db991..93e8d32 100644
+--- a/node_modules/next/dist/esm/build/entries.js
++++ b/node_modules/next/dist/esm/build/entries.js
+@@ -106,13 +106,13 @@ export async function getStaticInfoIncludingLayouts({ isInsideAppDir, pageExtens
+ }
+ export function getPageFilePath({ absolutePagePath, pagesDir, appDir, rootDir }) {
+     if (absolutePagePath.startsWith(PAGES_DIR_ALIAS) && pagesDir) {
+-        return absolutePagePath.replace(PAGES_DIR_ALIAS, pagesDir);
++        return absolutePagePath.replace(PAGES_DIR_ALIAS, () => pagesDir);
+     }
+     if (absolutePagePath.startsWith(APP_DIR_ALIAS) && appDir) {
+-        return absolutePagePath.replace(APP_DIR_ALIAS, appDir);
++        return absolutePagePath.replace(APP_DIR_ALIAS, () => appDir);
+     }
+     if (absolutePagePath.startsWith(ROOT_DIR_ALIAS)) {
+-        return absolutePagePath.replace(ROOT_DIR_ALIAS, rootDir);
++        return absolutePagePath.replace(ROOT_DIR_ALIAS, () => rootDir);
+     }
+     return require.resolve(absolutePagePath);
+ }

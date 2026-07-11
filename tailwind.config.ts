@@ -18,8 +18,8 @@ const config: Config = {
         border: '#2A2A2A',
       },
       fontFamily: {
-        display: ['Cormorant Garamond', 'serif'],
-        body: ['DM Sans', 'sans-serif'],
+        display: ['var(--font-display)', 'serif'],
+        body: ['var(--font-body)', 'sans-serif'],
       },
       animation: {
         'fade-up': 'fadeUp 0.7s ease forwards',

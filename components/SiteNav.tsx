@@ -92,8 +92,7 @@ export default function SiteNav() {
           ))}
           <Link
             href="/upload"
-            className="mt-2 inline-flex justify-center font-body text-sm font-medium px-5 py-3 rounded-full text-obsidian"
-            style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
+            className="bg-grad-gold mt-2 inline-flex justify-center font-body text-sm font-medium px-5 py-3 rounded-full text-obsidian"
           >
             Get Headshots
           </Link>

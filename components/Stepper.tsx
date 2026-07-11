@@ -17,8 +17,7 @@ export default function Stepper({ current }: { current: 1 | 2 | 3 }) {
             <div className="flex items-center gap-2">
               <span
                 className={`w-7 h-7 rounded-full flex items-center justify-center font-body text-xs font-semibold border transition-colors
-                  ${active ? 'text-obsidian border-transparent' : done ? 'text-gold border-gold/50' : 'text-cream-muted border-border'}`}
-                style={active ? { background: 'linear-gradient(135deg, #E2C06A, #C9A550)' } : undefined}
+                  ${active ? 'bg-grad-gold text-obsidian border-transparent' : done ? 'text-gold border-gold/50' : 'text-cream-muted border-border'}`}
               >
                 {done ? (
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

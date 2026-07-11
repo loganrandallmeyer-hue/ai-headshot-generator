@@ -339,9 +339,8 @@ export default function UploadPage() {
         <button
           onClick={handleSubmit}
           disabled={loading || photos.length < MIN_PHOTOS || !email}
-          className={`w-full py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300
+          className={`bg-grad-gold w-full py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300
             ${(!loading && photos.length >= MIN_PHOTOS && email) ? 'hover:scale-[1.02] hover:shadow-xl cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
-          style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
         >
           {loading ? (
             <span className="flex items-center justify-center gap-2">
