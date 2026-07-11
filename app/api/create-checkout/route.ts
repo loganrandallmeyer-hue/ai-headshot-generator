@@ -38,10 +38,18 @@ export async function POST(req: NextRequest) {
         { status: 409 }
       )
     }
+    // Persist the hosted photo URL now, while it's confirmed to exist. Replicate
+    // purges prediction input data after its own retention window (observed:
+    // gone within a few days), independent of anything we control — if the
+    // webhook fires late (Stripe retries failing webhooks for up to 3 days),
+    // re-deriving the photo from the prediction record can fail even though the
+    // order is otherwise perfectly fulfillable. Storing it directly in Stripe
+    // metadata makes fulfillment durable regardless of Replicate's retention.
+    const photoUrl = String(input.input_image)
 
-    // We store only the preview prediction ID. The webhook recovers the
-    // customer's photos from the Replicate prediction record — photo data
-    // is far too large for Stripe metadata (500 chars/value, 50 keys).
+    // We also keep prediction_id for backward compatibility with in-flight
+    // orders created before photo_url existed — the webhook falls back to
+    // re-deriving the photo from Replicate if photo_url is ever absent.
     //
     // Redirect back to the domain the customer is actually on. Deriving this
     // from the request means a missing or placeholder NEXT_PUBLIC_BASE_URL can
@@ -77,6 +85,7 @@ export async function POST(req: NextRequest) {
         email,
         tier,
         prediction_id: predictionId,
+        photo_url: photoUrl,
       },
       expires_at: Math.floor(Date.now() / 1000) + 31 * 60, // Stripe minimum is 30 min
       success_url: `${baseUrl}/success?email=${encodeURIComponent(email)}&session_id=${sessionId}&tier=${tier}`,

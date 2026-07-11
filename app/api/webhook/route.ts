@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
   const email = metadata.email
   const tier = (metadata.tier || 'premium') as Tier
   const predictionId = metadata.prediction_id
+  const photoUrl = metadata.photo_url
 
   if (!email || !predictionId) {
     console.error('Missing email or prediction_id in session metadata', metadata)
@@ -110,9 +111,13 @@ export async function POST(req: NextRequest) {
   await writeFulfillmentState({ fulfillment_claimed_at: String(Date.now()) })
 
   try {
-    // Recover the customer's photos from the preview prediction record —
-    // no photo data ever passes through Stripe.
-    const inputImages = await getInputImagesFromPrediction(predictionId)
+    // Prefer the photo URL stored directly on the Checkout Session at creation
+    // time — durable regardless of Replicate's prediction data retention.
+    // Fall back to re-deriving it from the prediction record for orders
+    // created before photo_url existed.
+    const inputImages = photoUrl
+      ? [photoUrl]
+      : await getInputImagesFromPrediction(predictionId)
 
     const count = TIERS[tier]?.count ?? 30
     console.log(`Generating ${count} headshots for ${email} (tier: ${tier}, ${inputImages.length} reference photos)`)
