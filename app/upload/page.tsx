@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Link from 'next/link'
 import Stepper from '../../components/Stepper'
+import Reveal from '../../components/Reveal'
 
 interface PhotoItem {
   file: File
@@ -192,7 +193,7 @@ export default function UploadPage() {
 
       <div className="max-w-2xl mx-auto px-6 py-16">
         <Stepper current={1} />
-        <div className="text-center mb-12">
+        <Reveal as="div" className="text-center mb-12">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Free preview · Step 1</p>
           <h1 className="font-display t-h1 font-light text-cream mb-4">Upload Your Photos</h1>
           <p className="font-body text-sm text-cream-muted leading-relaxed">
@@ -200,9 +201,9 @@ export default function UploadPage() {
             our AI transforms it into professional headshots while keeping your exact likeness.
             Add up to 4 spares in case you want to try a different shot.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="grid grid-cols-2 gap-3 mb-8">
+        <Reveal as="div" delay={80} className="grid grid-cols-2 gap-3 mb-8">
           {[
             {
               tip: 'Good natural lighting',
@@ -242,7 +243,7 @@ export default function UploadPage() {
               <span className="font-body text-xs text-cream-muted">{tip}</span>
             </div>
           ))}
-        </div>
+        </Reveal>
 
         <div
           {...getRootProps()}
@@ -339,7 +340,7 @@ export default function UploadPage() {
         <button
           onClick={handleSubmit}
           disabled={loading || photos.length < MIN_PHOTOS || !email}
-          className={`bg-grad-gold w-full py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300
+          className={`bg-grad-gold cta-gold w-full py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300
             ${(!loading && photos.length >= MIN_PHOTOS && email) ? 'hover:scale-[1.02] hover:shadow-xl cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
         >
           {loading ? (

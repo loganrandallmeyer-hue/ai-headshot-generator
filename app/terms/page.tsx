@@ -36,7 +36,7 @@ export default function TermsPage() {
         <Link href="/" className="font-display text-2xl font-semibold">
           Snap<span className="text-gold">Shot</span> AI
         </Link>
-        <Link href="/upload" className="font-body text-sm font-medium px-5 py-2 rounded-full border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300">
+        <Link href="/upload" className="btn-tactile font-body text-sm font-medium px-5 py-2 rounded-full border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300">
           Get Headshots
         </Link>
       </nav>

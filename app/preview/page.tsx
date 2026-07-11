@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Stepper from '../../components/Stepper'
+import Reveal from '../../components/Reveal'
 
 const TIERS = [
   {
@@ -160,7 +161,7 @@ function PreviewContent() {
 
         {/* Header */}
         <Stepper current={2} />
-        <div className="text-center mb-12">
+        <Reveal as="div" className="text-center mb-12">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Almost done · Step 2</p>
           <h1 className="font-display t-h1 font-light text-cream mb-4">
             Your Preview Is Ready
@@ -168,7 +169,7 @@ function PreviewContent() {
           <p className="font-body text-sm text-cream-muted">
             Here&rsquo;s a sample of what your AI headshots look like. Purchase to unlock your full set — watermark-free.
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
@@ -257,7 +258,7 @@ function PreviewContent() {
             <button
               onClick={handleCheckout}
               disabled={loading}
-              className={`bg-grad-gold w-full py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300
+              className={`bg-grad-gold cta-gold w-full py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300
                 ${!loading ? 'hover:scale-[1.02] hover:shadow-xl cursor-pointer' : 'opacity-60 cursor-not-allowed'}`}
             >
               {loading ? (

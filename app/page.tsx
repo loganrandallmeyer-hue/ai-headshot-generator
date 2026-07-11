@@ -151,7 +151,7 @@ export default function LandingPage() {
             <div className="animate-fade-up delay-300 flex flex-col sm:flex-row items-center lg:items-start gap-4">
               <Link
                 href="/upload"
-                className="bg-grad-gold gold-glow inline-flex items-center gap-3 px-8 py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                className="bg-grad-gold cta-gold gold-glow inline-flex items-center gap-3 px-8 py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 <span>Try It Free — See Your Preview</span>
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -350,7 +350,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/upload" className="block w-full py-3 rounded-full font-body font-medium text-center border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300">
+                <Link href="/upload" className="btn-tactile block w-full py-3 rounded-full font-body font-medium text-center border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300">
                   Start Free Preview
                 </Link>
               </div>
@@ -372,7 +372,7 @@ export default function LandingPage() {
                       </li>
                     ))}
                   </ul>
-                  <Link href="/upload" className="bg-grad-gold block w-full py-3 rounded-full font-body font-medium text-obsidian text-center transition-all duration-300 hover:scale-[1.02]">
+                  <Link href="/upload" className="bg-grad-gold cta-gold block w-full py-3 rounded-full font-body font-medium text-obsidian text-center transition-all duration-300 hover:scale-[1.02]">
                     Start Free Preview
                   </Link>
                 </div>
@@ -394,7 +394,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/upload" className="block w-full py-3 rounded-full font-body font-medium text-center border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300">
+                <Link href="/upload" className="btn-tactile block w-full py-3 rounded-full font-body font-medium text-center border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300">
                   Start Free Preview
                 </Link>
               </div>
@@ -451,7 +451,7 @@ export default function LandingPage() {
           <p className="font-body text-sm text-cream-muted mb-8">Free preview · From $9.99 · Delivered in 30 minutes</p>
           <Link
             href="/upload"
-            className="bg-grad-gold gold-glow inline-flex items-center gap-3 px-10 py-5 rounded-full font-body font-medium text-obsidian text-lg transition-all duration-300 hover:scale-105"
+            className="bg-grad-gold cta-gold gold-glow inline-flex items-center gap-3 px-10 py-5 rounded-full font-body font-medium text-obsidian text-lg transition-all duration-300 hover:scale-105"
           >
             Start My Free Preview
           </Link>

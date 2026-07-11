@@ -56,7 +56,7 @@ export default function SiteNav() {
         <div className="flex items-center gap-3">
           <Link
             href="/upload"
-            className="hidden sm:inline-flex font-body text-sm font-medium px-5 py-2 rounded-full border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300"
+            className="btn-tactile hidden sm:inline-flex font-body text-sm font-medium px-5 py-2 rounded-full border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300"
           >
             Get Headshots
           </Link>
@@ -83,7 +83,7 @@ export default function SiteNav() {
 
       {/* Mobile dropdown */}
       {open && (
-        <div className="md:hidden border-t border-border/60 px-6 py-4 flex flex-col gap-4"
+        <div className="mobile-menu-panel md:hidden border-t border-border/60 px-6 py-4 flex flex-col gap-4"
           style={{ background: 'rgba(9,9,9,0.97)' }}>
           {LINKS.map((l) => (
             <a key={l.href} href={l.href} onClick={() => setOpen(false)}
@@ -93,7 +93,7 @@ export default function SiteNav() {
           ))}
           <Link
             href="/upload"
-            className="bg-grad-gold mt-2 inline-flex justify-center font-body text-sm font-medium px-5 py-3 rounded-full text-obsidian"
+            className="bg-grad-gold cta-gold mt-2 inline-flex justify-center font-body text-sm font-medium px-5 py-3 rounded-full text-obsidian"
           >
             Get Headshots
           </Link>

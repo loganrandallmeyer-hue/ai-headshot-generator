@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'
 import Stepper from '../../components/Stepper'
+import Reveal from '../../components/Reveal'
 
 function SuccessContent() {
   const params = useSearchParams()
@@ -36,14 +37,14 @@ function SuccessContent() {
       </div>
 
       {/* Icon */}
-      <div
+      <Reveal as="div"
         className="relative w-24 h-24 rounded-full flex items-center justify-center mb-8 text-gold"
         style={{ background: 'linear-gradient(135deg, rgba(201,165,80,0.2), rgba(201,165,80,0.05))', border: '1px solid rgba(201,165,80,0.3)' }}
       >
         <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M20 6L9 17l-5-5" />
         </svg>
-      </div>
+      </Reveal>
 
       <p className="font-body text-xs tracking-widest uppercase text-gold mb-4">Payment Confirmed</p>
 
@@ -61,7 +62,7 @@ function SuccessContent() {
       </div>
 
       {/* What to do while waiting */}
-      <div className="max-w-md w-full p-8 rounded-2xl border border-border bg-charcoal/50 mb-10 text-left">
+      <Reveal as="div" delay={100} className="max-w-md w-full p-8 rounded-2xl border border-border bg-charcoal/50 mb-10 text-left">
         <h2 className="font-display text-2xl text-cream mb-4">While you wait...</h2>
         <ul className="space-y-3">
           {[
@@ -76,7 +77,7 @@ function SuccessContent() {
             </li>
           ))}
         </ul>
-      </div>
+      </Reveal>
 
       {/* Referral / share */}
       <div className="max-w-md w-full p-6 rounded-2xl border border-gold/25 bg-gold/[0.03] mb-10 text-center">
@@ -84,7 +85,7 @@ function SuccessContent() {
         <p className="font-body text-xs text-cream-muted mb-4">They can preview theirs free too — no payment to try.</p>
         <button
           onClick={handleShare}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-body text-sm font-medium border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300"
+          className="btn-tactile inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-body text-sm font-medium border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300"
         >
           {copied ? (
             <>
