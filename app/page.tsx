@@ -286,7 +286,7 @@ export default function LandingPage() {
           </div>
           <h2 className="font-display t-h2 font-light text-cream">Every style. Every industry.</h2>
           <p className="font-body text-sm text-cream-muted mt-4">
-            Standard and Premium packages include multiple background styles so your set works everywhere you need it.
+            Pick the style that fits — every headshot in your set is generated to match it.
           </p>
         </Reveal>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -366,7 +366,7 @@ export default function LandingPage() {
                   <div className="font-display text-5xl font-semibold text-cream mb-1">$19.99</div>
                   <p className="font-body text-xs text-cream-muted mb-6">≈ $1.33 per photo · no subscription</p>
                   <ul className="space-y-2 mb-8 flex-1">
-                    {['15 professional headshots', '3 background styles', 'High-resolution downloads', 'Commercial use license', 'Delivered in 30 min'].map((item) => (
+                    {['15 professional headshots', 'Your chosen style', 'High-resolution downloads', 'Commercial use license', 'Delivered in 30 min'].map((item) => (
                       <li key={item} className="flex items-center gap-2 font-body text-sm text-cream-muted">
                         <span className="text-gold">✓</span><span>{item}</span>
                       </li>
@@ -388,7 +388,7 @@ export default function LandingPage() {
                 <div className="font-display text-5xl font-semibold text-cream mb-1">$24.99</div>
                 <p className="font-body text-xs text-cream-muted mb-6">≈ $0.83 per photo · no subscription</p>
                 <ul className="space-y-2 mb-8 flex-1">
-                  {['30 professional headshots', '5 background styles', 'High-resolution downloads', 'Commercial use license', 'Delivered in 30 min', 'Best value per photo'].map((item) => (
+                  {['30 professional headshots', 'Your chosen style', 'High-resolution downloads', 'Commercial use license', 'Delivered in 30 min', 'Best value per photo'].map((item) => (
                     <li key={item} className="flex items-center gap-2 font-body text-sm text-cream-muted">
                       <span className="text-gold">✓</span><span>{item}</span>
                     </li>

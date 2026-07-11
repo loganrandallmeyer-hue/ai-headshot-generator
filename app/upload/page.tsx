@@ -2,9 +2,11 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
+import Image from 'next/image'
 import FlowNav from '../../components/FlowNav'
 import Stepper from '../../components/Stepper'
 import Reveal from '../../components/Reveal'
+import { HEADSHOT_STYLES, DEFAULT_STYLE, type StyleId } from '@/lib/replicate'
 
 interface PhotoItem {
   file: File
@@ -16,6 +18,7 @@ const MAX_PHOTOS = 5
 
 export default function UploadPage() {
   const [photos, setPhotos] = useState<PhotoItem[]>([])
+  const [selectedStyle, setSelectedStyle] = useState<StyleId>(DEFAULT_STYLE)
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -119,7 +122,7 @@ export default function UploadPage() {
       const previewRes = await fetch('/api/generate-preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileUrls, email }),
+        body: JSON.stringify({ fileUrls, email, style: selectedStyle }),
       })
       if (!previewRes.ok) {
         const data = await previewRes.json().catch(() => ({}))
@@ -169,6 +172,7 @@ export default function UploadPage() {
         email,
         prediction_id: predictionId,
         preview_url: encodeURIComponent(previewUrl),
+        style: selectedStyle,
       })
       window.location.href = `/preview?${params.toString()}`
     } catch (err: unknown) {
@@ -238,6 +242,58 @@ export default function UploadPage() {
               <span className="font-body text-xs text-cream-muted">{tip}</span>
             </div>
           ))}
+        </Reveal>
+
+        <Reveal as="div" delay={140} className="mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <p className="font-body text-xs uppercase tracking-widest text-gold">Choose a style</p>
+            <p className="font-body text-xs text-cream-muted">{HEADSHOT_STYLES[selectedStyle].label} selected</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {(Object.entries(HEADSHOT_STYLES) as [StyleId, typeof HEADSHOT_STYLES[StyleId]][]).map(([id, s]) => {
+              const isSelected = selectedStyle === id
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setSelectedStyle(id)}
+                  aria-pressed={isSelected}
+                  className={`lift group relative text-left rounded-2xl overflow-hidden transition-all duration-200 ${
+                    isSelected ? 'surface-hero' : 'surface-base hover:border-gold/40'
+                  }`}
+                >
+                  <div className="relative aspect-[832/1216] overflow-hidden">
+                    <Image
+                      src={s.preview}
+                      alt={`${s.label} style example`}
+                      width={832}
+                      height={1216}
+                      sizes="(max-width: 640px) 45vw, 200px"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-obsidian/85 via-obsidian/10 to-transparent" />
+                    <span
+                      aria-hidden="true"
+                      className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                        isSelected ? 'border-gold bg-gold' : 'border-cream/40 bg-obsidian/40'
+                      }`}
+                    >
+                      <svg
+                        className={`w-3.5 h-3.5 text-obsidian transition-all duration-200 ${isSelected ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+                      >
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                    </span>
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <p className="font-display text-base text-cream leading-tight">{s.label}</p>
+                      <p className="font-body text-[11px] text-cream-muted/90 leading-snug mt-0.5">{s.description}</p>
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
         </Reveal>
 
         <div

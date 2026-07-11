@@ -6,6 +6,7 @@ import Link from 'next/link'
 import FlowNav from '../../components/FlowNav'
 import Stepper from '../../components/Stepper'
 import Reveal from '../../components/Reveal'
+import { HEADSHOT_STYLES, DEFAULT_STYLE, isValidStyle } from '@/lib/replicate'
 
 const TIERS = [
   {
@@ -22,9 +23,9 @@ const TIERS = [
     label: '15 Headshots',
     price: '$19.99',
     priceCents: 1999,
-    description: 'Great variety across three styles.',
+    description: 'Multiple takes in your chosen style.',
     perPhoto: '≈ $1.33 / photo',
-    features: ['15 professional headshots', '3 background styles', 'High resolution'],
+    features: ['15 professional headshots', 'Your chosen style', 'High resolution'],
     popular: true,
   },
   {
@@ -34,7 +35,7 @@ const TIERS = [
     priceCents: 2499,
     description: 'The full set — maximum variety.',
     perPhoto: '≈ $0.83 / photo',
-    features: ['30 professional headshots', '5 background styles', 'High resolution', 'Best value'],
+    features: ['30 professional headshots', 'Your chosen style', 'High resolution', 'Best value'],
   },
 ]
 
@@ -51,6 +52,8 @@ function PreviewContent() {
   const email = searchParams.get('email') ?? ''
   const predictionId = searchParams.get('prediction_id') ?? ''
   const previewUrl = searchParams.get('preview_url') ? decodeURIComponent(searchParams.get('preview_url')!) : ''
+  const styleParam = searchParams.get('style')
+  const style = isValidStyle(styleParam) ? styleParam : DEFAULT_STYLE
 
   // Draw watermarked preview on canvas
   useEffect(() => {
@@ -118,7 +121,7 @@ function PreviewContent() {
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, predictionId, sessionId, tier: selectedTier }),
+        body: JSON.stringify({ email, predictionId, sessionId, tier: selectedTier, style }),
       })
 
       if (res.status === 409) {
@@ -161,6 +164,9 @@ function PreviewContent() {
           <p className="font-body text-sm text-cream-muted">
             Here&rsquo;s a sample of what your AI headshots look like. Purchase to unlock your full set — watermark-free.
           </p>
+          <span className="inline-flex items-center gap-2 mt-4 px-3 py-1 rounded-full border border-gold/30 bg-gold/5 font-body text-xs text-gold">
+            Style: {HEADSHOT_STYLES[style].label}
+          </span>
         </Reveal>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">

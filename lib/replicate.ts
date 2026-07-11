@@ -21,13 +21,58 @@ export function newReplicate(): Replicate {
 const IDENTITY_GUARD =
   "Keep this exact person's identity completely unchanged: same face, same facial structure, same gender, same jawline, same nose, same eyes, same lips, same skin tone and natural skin texture, same hairstyle. Do NOT add makeup, lip gloss, or lipstick. Do NOT smooth or retouch the skin. Do NOT feminize, masculinize, beautify, or slim the face. The person must be instantly recognizable as the same person from the original photo."
 
-const HEADSHOT_PROMPTS = [
-  `Change the background to a clean white studio backdrop, change the clothing to professional business attire, and apply soft even studio lighting, sharp focus, like a corporate headshot. ${IDENTITY_GUARD}`,
-  `Change the background to a blurred modern office and change the clothing to professional business attire, with natural professional lighting and sharp focus. ${IDENTITY_GUARD}`,
-  `Change the background to an outdoor scene with soft bokeh and change the clothing to smart-casual attire, with warm natural light and sharp focus. ${IDENTITY_GUARD}`,
-  `Change the background to a dark gradient studio backdrop and change the clothing to dark business attire, with professional rim lighting and sharp focus, like an executive portrait. ${IDENTITY_GUARD}`,
-  `Change the background to a light grey seamless studio backdrop and change the clothing to business-casual attire, with soft diffused lighting and sharp focus. ${IDENTITY_GUARD}`,
-]
+/**
+ * Single source of truth for every selectable headshot style: the frontend
+ * picker, the preview generation call, and the full-set generation call all
+ * derive from this map. Adding a new style is exactly one new entry here —
+ * no other file needs to change.
+ */
+export const HEADSHOT_STYLES = {
+  linkedin: {
+    label: 'LinkedIn',
+    description: 'Clean, approachable, business-casual',
+    preview: '/styles/linkedin.jpg',
+    prompt: `Change the outfit to modern business-casual attire and the background to a clean, softly blurred contemporary office. Apply soft natural lighting and give the subject a warm, approachable, friendly expression with relaxed shoulders. Sharp focus, authentic and modern professional photography, ideal for a LinkedIn profile photo. ${IDENTITY_GUARD}`,
+  },
+  corporate: {
+    label: 'Corporate',
+    description: 'Formal attire, neutral studio backdrop',
+    preview: '/styles/corporate.jpg',
+    prompt: `Change the outfit to formal business attire and the background to a neutral, seamless studio backdrop. Apply even, traditional studio lighting and give the subject a conservative, upright, professional posture with a composed expression. Sharp focus, high-end traditional corporate portrait photography. ${IDENTITY_GUARD}`,
+  },
+  executive: {
+    label: 'Executive',
+    description: 'Commanding presence, dark tones',
+    preview: '/styles/executive.jpg',
+    prompt: `Change the outfit to a tailored formal suit and the background to a dark gradient studio backdrop. Apply dramatic rim lighting and give the subject a commanding, confident posture with a composed, authoritative expression. Sharp focus, premium luxury aesthetic, like a CEO or leadership portrait. ${IDENTITY_GUARD}`,
+  },
+  creative: {
+    label: 'Creative',
+    description: 'Relaxed, modern, personality-forward',
+    preview: '/styles/creative.jpg',
+    prompt: `Change the outfit to modern, fashion-forward smart-casual clothing and the background to a contemporary artistic office or studio space. Apply editorial-style lighting and give the subject a relaxed posture with a genuine, personality-forward, expressive smile. Sharp focus, modern editorial portrait photography, more candid and less rigid than a traditional headshot. ${IDENTITY_GUARD}`,
+  },
+  startup: {
+    label: 'Startup',
+    description: 'Smart-casual, bright and energetic',
+    preview: '/styles/startup.jpg',
+    prompt: `Change the outfit to smart-casual modern clothing and the background to a bright, contemporary tech office. Apply bright natural lighting and give the subject an energetic, friendly, founder-like expression with an approachable posture. Sharp focus, modern startup branding photography, energetic and optimistic mood. ${IDENTITY_GUARD}`,
+  },
+  academic: {
+    label: 'Academic',
+    description: 'Professional, understated, credible',
+    preview: '/styles/academic.jpg',
+    prompt: `Change the outfit to understated, neutral professional attire and the background to a clean university or library-inspired setting. Apply soft, even lighting and give the subject a credible, intelligent, composed expression with a minimalistic, uncluttered composition. Sharp focus, understated academic professional photography. ${IDENTITY_GUARD}`,
+  },
+} as const
+
+export type StyleId = keyof typeof HEADSHOT_STYLES
+
+export const DEFAULT_STYLE: StyleId = 'linkedin'
+
+export function isValidStyle(value: unknown): value is StyleId {
+  return typeof value === 'string' && Object.prototype.hasOwnProperty.call(HEADSHOT_STYLES, value)
+}
 
 export const TIERS = {
   basic:    { price: 999,  label: '1 Headshot',   count: 1  },
@@ -37,9 +82,9 @@ export const TIERS = {
 
 export type Tier = keyof typeof TIERS
 
-export function buildHeadshotInput(imageUrl: string, promptIndex: number): Record<string, unknown> {
+export function buildHeadshotInput(imageUrl: string, style: StyleId): Record<string, unknown> {
   return {
-    prompt: HEADSHOT_PROMPTS[promptIndex % HEADSHOT_PROMPTS.length],
+    prompt: HEADSHOT_STYLES[style].prompt,
     input_image: imageUrl,
     aspect_ratio: '1:1',
     output_format: 'jpg',
@@ -73,19 +118,20 @@ export async function getInputImagesFromPrediction(predictionId: string): Promis
 }
 
 /**
- * Generate `count` headshots from one photo, cycling background styles.
- * One prediction per image, all in PARALLEL. Tolerates partial failures
- * as long as at least half the set generates.
+ * Generate `count` headshots from one photo, all in the chosen style.
+ * One prediction per image, all in PARALLEL — each call gets its own model
+ * seed, so the set has natural pose/framing variety despite sharing a
+ * prompt. Tolerates partial failures as long as at least half the set
+ * generates.
  */
-export async function generateHeadshots(imageUrls: string[], count: number = 30): Promise<string[]> {
+export async function generateHeadshots(imageUrls: string[], count: number = 30, style: StyleId = DEFAULT_STYLE): Promise<string[]> {
   const replicate = newReplicate()
   const sourceImage = imageUrls[0]
-  const styleCount = count <= 1 ? 1 : count <= 15 ? 3 : HEADSHOT_PROMPTS.length
 
   const results = await Promise.allSettled(
-    Array.from({ length: count }, (_, i) =>
+    Array.from({ length: count }, () =>
       replicate.run(HEADSHOT_MODEL as `${string}/${string}`, {
-        input: buildHeadshotInput(sourceImage, i % styleCount),
+        input: buildHeadshotInput(sourceImage, style),
       })
     )
   )

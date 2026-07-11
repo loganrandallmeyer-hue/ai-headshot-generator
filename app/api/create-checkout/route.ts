@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { TIERS, Tier, newReplicate } from '@/lib/replicate'
+import { TIERS, Tier, newReplicate, isValidStyle, DEFAULT_STYLE } from '@/lib/replicate'
 
 // Replicate auto-deletes API prediction inputs after 1 hour. We only sell
 // while the customer's photos are still recoverable: the preview must be
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     apiVersion: '2023-10-16',
   })
   try {
-    const { email, sessionId, tier, predictionId } = await req.json()
+    const { email, sessionId, tier, predictionId, style } = await req.json()
 
     if (!email || !sessionId || !tier || !predictionId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -24,6 +24,10 @@ export async function POST(req: NextRequest) {
     if (!(tier in TIERS)) {
       return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
     }
+
+    // Older in-flight preview sessions (created before style selection shipped)
+    // won't have a style param — fall back rather than hard-fail their checkout.
+    const selectedStyle = isValidStyle(style) ? style : DEFAULT_STYLE
 
     const selectedTier = TIERS[tier as Tier]
 
@@ -86,6 +90,7 @@ export async function POST(req: NextRequest) {
         tier,
         prediction_id: predictionId,
         photo_url: photoUrl,
+        style: selectedStyle,
       },
       expires_at: Math.floor(Date.now() / 1000) + 31 * 60, // Stripe minimum is 30 min
       success_url: `${baseUrl}/success?email=${encodeURIComponent(email)}&session_id=${sessionId}&tier=${tier}`,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { generateHeadshots, getInputImagesFromPrediction, TIERS, Tier } from '@/lib/replicate'
+import { generateHeadshots, getInputImagesFromPrediction, TIERS, Tier, isValidStyle, DEFAULT_STYLE } from '@/lib/replicate'
 import { sendHeadshotsEmail } from '@/lib/email'
 
 export const runtime = 'nodejs'
@@ -51,6 +51,9 @@ export async function POST(req: NextRequest) {
   const tier = (metadata.tier || 'premium') as Tier
   const predictionId = metadata.prediction_id
   const photoUrl = metadata.photo_url
+  // Orders created before style selection shipped won't have this — fall
+  // back rather than fail fulfillment for otherwise-valid in-flight orders.
+  const style = isValidStyle(metadata.style) ? metadata.style : DEFAULT_STYLE
 
   if (!email || !predictionId) {
     console.error('Missing email or prediction_id in session metadata', metadata)
@@ -120,9 +123,9 @@ export async function POST(req: NextRequest) {
       : await getInputImagesFromPrediction(predictionId)
 
     const count = TIERS[tier]?.count ?? 30
-    console.log(`Generating ${count} headshots for ${email} (tier: ${tier}, ${inputImages.length} reference photos)`)
+    console.log(`Generating ${count} headshots for ${email} (tier: ${tier}, style: ${style}, ${inputImages.length} reference photos)`)
 
-    const headshots = await generateHeadshots(inputImages, count)
+    const headshots = await generateHeadshots(inputImages, count, style)
     console.log(`Generated ${headshots.length} headshots for ${email}`)
 
     // Email results as ATTACHMENTS — Replicate URLs expire within ~1 hour,

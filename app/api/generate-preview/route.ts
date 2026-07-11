@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
-import { HEADSHOT_MODEL, buildHeadshotInput, newReplicate } from '@/lib/replicate'
+import { HEADSHOT_MODEL, buildHeadshotInput, newReplicate, isValidStyle } from '@/lib/replicate'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -48,10 +48,13 @@ async function hostPhoto(dataUri: string): Promise<string> {
 // webhook recovers it after payment.
 export async function POST(req: NextRequest) {
   try {
-    const { fileUrls, email } = await req.json()
+    const { fileUrls, email, style } = await req.json()
 
     if (!Array.isArray(fileUrls) || fileUrls.length === 0 || !email) {
       return NextResponse.json({ error: 'Missing fileUrls or email' }, { status: 400 })
+    }
+    if (!isValidStyle(style)) {
+      return NextResponse.json({ error: 'Missing or invalid style' }, { status: 400 })
     }
     if (!EMAIL_RE.test(email)) {
       return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 })
@@ -77,7 +80,7 @@ export async function POST(req: NextRequest) {
 
     const prediction = await replicate.predictions.create({
       model: HEADSHOT_MODEL,
-      input: buildHeadshotInput(hostedUrl, 0),
+      input: buildHeadshotInput(hostedUrl, style),
     })
 
     return NextResponse.json({ predictionId: prediction.id, sessionId })
