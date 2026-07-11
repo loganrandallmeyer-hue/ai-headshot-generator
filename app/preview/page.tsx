@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import FlowNav from '../../components/FlowNav'
 import Stepper from '../../components/Stepper'
 import Reveal from '../../components/Reveal'
 
@@ -146,16 +147,7 @@ function PreviewContent() {
   return (
     <main className="min-h-screen bg-obsidian text-cream">
 
-      {/* NAV */}
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-border">
-        <Link href="/" className="font-display text-2xl font-semibold">
-          Snap<span className="text-gold">Shot</span> AI
-        </Link>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-gold animate-pulse" />
-          <span className="font-body text-xs text-cream-muted tracking-wider uppercase">Preview Ready</span>
-        </div>
-      </nav>
+      <FlowNav status="Preview Ready" live />
 
       <div className="max-w-5xl mx-auto px-6 py-16">
 
@@ -176,7 +168,10 @@ function PreviewContent() {
           {/* Watermarked Preview */}
           <div>
             <p className="font-body text-xs uppercase tracking-widest text-cream-muted mb-3">Sample Preview</p>
-            <div className="relative rounded-2xl overflow-hidden border border-border bg-charcoal/30">
+            <div className="surface-hero relative rounded-2xl overflow-hidden">
+              <span className="absolute left-3 top-3 z-10 rounded-full bg-obsidian/80 px-3 py-1 text-[10px] uppercase tracking-wide text-gold border border-gold/30">
+                Your result
+              </span>
               {previewUrl && (
                 <canvas
                   ref={canvasRef}
@@ -210,11 +205,9 @@ function PreviewContent() {
                 <button
                   key={tier.id}
                   onClick={() => setSelectedTier(tier.id)}
-                  className={`relative text-left px-5 py-4 rounded-2xl border transition-all duration-200 ${
-                    selectedTier === tier.id
-                      ? 'border-gold bg-gold/8'
-                      : 'border-border bg-charcoal/30 hover:border-gold/40'
-                  }`}
+                  className={`lift relative text-left px-5 py-4 rounded-2xl transition-all duration-200 ${
+                    selectedTier === tier.id ? 'surface-hero' : 'surface-base hover:border-gold/40'
+                  } ${tier.popular ? 'lg:scale-[1.02]' : ''}`}
                 >
                   {tier.popular && (
                     <span className="bg-grad-gold absolute -top-2.5 left-4 px-3 py-0.5 rounded-full text-[10px] font-body font-semibold tracking-wider uppercase text-obsidian">
@@ -228,12 +221,17 @@ function PreviewContent() {
                         <span className="font-display text-2xl text-gold">{tier.price}</span>
                         {tier.perPhoto && <span className="font-body text-[10px] text-cream-muted">{tier.perPhoto}</span>}
                       </span>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                         selectedTier === tier.id ? 'border-gold bg-gold' : 'border-border'
                       }`}>
-                        {selectedTier === tier.id && (
-                          <div className="w-2 h-2 rounded-full bg-obsidian" />
-                        )}
+                        <svg
+                          className={`w-3.5 h-3.5 text-obsidian transition-all duration-200 ${
+                            selectedTier === tier.id ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+                          }`}
+                          viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+                        >
+                          <path d="M20 6L9 17l-5-5" />
+                        </svg>
                       </div>
                     </div>
                   </div>

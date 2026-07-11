@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'
+import FlowNav from '../../components/FlowNav'
 import Stepper from '../../components/Stepper'
 import Reveal from '../../components/Reveal'
 
@@ -27,21 +28,24 @@ function SuccessContent() {
   }
 
   return (
-    <main className="min-h-screen bg-obsidian text-cream flex flex-col items-center justify-center px-6 text-center">
-      {/* Glow */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 50% 40% at 50% 50%, rgba(201,165,80,0.08) 0%, transparent 70%)' }} />
+    <main className="min-h-screen bg-obsidian text-cream flex flex-col">
+      <FlowNav status="Confirmed" />
+      <div className="relative flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
+        {/* Glow */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse 50% 40% at 50% 50%, rgba(201,165,80,0.08) 0%, transparent 70%)' }} />
 
-      <div className="w-full max-w-sm relative">
-        <Stepper current={3} />
-      </div>
+        <div className="w-full max-w-sm relative">
+          <Stepper current={3} />
+        </div>
 
       {/* Icon */}
       <Reveal as="div"
-        className="relative w-24 h-24 rounded-full flex items-center justify-center mb-8 text-gold"
-        style={{ background: 'linear-gradient(135deg, rgba(201,165,80,0.2), rgba(201,165,80,0.05))', border: '1px solid rgba(201,165,80,0.3)' }}
+        className="relative w-28 h-28 rounded-full flex items-center justify-center mb-8 text-gold shadow-[var(--glow-gold)]"
+        style={{ background: 'linear-gradient(135deg, rgba(201,165,80,0.22), rgba(201,165,80,0.06))', border: '1px solid rgba(201,165,80,0.35)' }}
       >
-        <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <span aria-hidden="true" className="absolute inset-0 rounded-full border border-gold/20" style={{ transform: 'scale(1.18)' }} />
+        <svg className="w-11 h-11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M20 6L9 17l-5-5" />
         </svg>
       </Reveal>
@@ -104,12 +108,13 @@ function SuccessContent() {
         </button>
       </div>
 
-      <Link
-        href="/"
-        className="font-body text-sm text-cream-muted hover:text-gold transition-colors"
-      >
-        ← Back to home
-      </Link>
+        <Link
+          href="/"
+          className="font-body text-sm text-cream-muted hover:text-gold transition-colors"
+        >
+          ← Back to home
+        </Link>
+      </div>
     </main>
   )
 }

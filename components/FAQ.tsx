@@ -22,7 +22,7 @@ export default function FAQ({ items }: { items: QA[] }) {
         return (
           <div
             key={q}
-            className="rounded-2xl border border-border bg-charcoal/40 overflow-hidden transition-colors duration-300 hover:border-gold/30"
+            className="surface-base rounded-2xl overflow-hidden transition-colors duration-300 hover:border-gold/30"
           >
             <button
               onClick={() => setOpen(isOpen ? null : i)}

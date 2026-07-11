@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import Link from 'next/link'
+import FlowNav from '../../components/FlowNav'
 import Stepper from '../../components/Stepper'
 import Reveal from '../../components/Reveal'
 
@@ -181,20 +181,15 @@ export default function UploadPage() {
 
   return (
     <main className="min-h-screen bg-obsidian text-cream">
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-border">
-        <Link href="/" className="font-display text-2xl font-semibold">
-          Snap<span className="text-gold">Shot</span> AI
-        </Link>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-gold" />
-          <span className="font-body text-xs text-cream-muted tracking-wider uppercase">Secure Upload</span>
-        </div>
-      </nav>
+      <FlowNav status="Secure Upload" />
 
       <div className="max-w-2xl mx-auto px-6 py-16">
         <Stepper current={1} />
-        <Reveal as="div" className="text-center mb-12">
-          <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Free preview · Step 1</p>
+        <Reveal as="div" className="mb-12 max-w-lg">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="h-px w-8 bg-gold" />
+            <p className="font-body text-xs tracking-widest uppercase text-gold">Free preview · Step 1</p>
+          </div>
           <h1 className="font-display t-h1 font-light text-cream mb-4">Upload Your Photos</h1>
           <p className="font-body text-sm text-cream-muted leading-relaxed">
             Upload <strong className="text-cream">one clear, well-lit photo</strong> of yourself &mdash;
@@ -238,8 +233,8 @@ export default function UploadPage() {
               ),
             },
           ].map(({ tip, icon }) => (
-            <div key={tip} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-charcoal/40">
-              <span className="text-gold shrink-0">{icon}</span>
+            <div key={tip} className="surface-base flex items-center gap-3 px-4 py-3 rounded-xl">
+              <span className="w-7 h-7 rounded-lg flex items-center justify-center text-gold shrink-0 border border-gold/25 bg-gold/5">{icon}</span>
               <span className="font-body text-xs text-cream-muted">{tip}</span>
             </div>
           ))}
@@ -247,10 +242,15 @@ export default function UploadPage() {
 
         <div
           {...getRootProps()}
-          className={`relative border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-300 mb-6
-            ${isDragActive ? 'border-gold bg-gold/5' : 'border-border hover:border-gold/50 bg-charcoal/30 hover:bg-charcoal/50'}`}
+          className={`relative border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-300 mb-6 shadow-[var(--shadow-1)] hover:shadow-[var(--shadow-2)]
+            ${isDragActive ? 'upload-active' : 'border-border bg-charcoal/30 hover:border-gold/50 hover:bg-charcoal/50'}`}
         >
           <input {...getInputProps()} />
+          <span className="mx-auto mb-4 w-12 h-12 rounded-full flex items-center justify-center text-gold border border-gold/30 bg-gold/5">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 16V4M12 4l-5 5M12 4l5 5" /><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+            </svg>
+          </span>
           <p className="font-display text-xl text-cream mb-1">
             {isDragActive ? 'Drop your photos here' : 'Drag and drop your photos'}
           </p>
@@ -311,7 +311,7 @@ export default function UploadPage() {
           </div>
         )}
 
-        <div className="mb-6" aria-live="polite">
+        <div className="surface-base rounded-2xl p-4 mb-6" aria-live="polite">
           <div className="flex justify-between font-body text-xs text-cream-muted mb-1">
             {loading ? (
               <><span>{statusMsg}</span><span>{uploadProgress}%</span></>
@@ -325,7 +325,7 @@ export default function UploadPage() {
               style={{
                 width: loading ? `${uploadProgress}%` : `${Math.min((photos.length / MIN_PHOTOS) * 100, 100)}%`,
                 background: (loading || photos.length >= MIN_PHOTOS)
-                  ? 'linear-gradient(90deg, #C9A550, #E2C06A)'
+                  ? 'var(--grad-gold)'
                   : 'linear-gradient(90deg, #666, #888)',
               }}
             />

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Logo from '../../components/Logo'
 
 export const metadata = { title: 'Terms of Service — SnapShot AI' }
 
@@ -33,8 +34,8 @@ export default function TermsPage() {
   return (
     <main className="min-h-screen bg-obsidian text-cream">
       <nav className="flex items-center justify-between px-8 py-5 border-b border-border">
-        <Link href="/" className="font-display text-2xl font-semibold">
-          Snap<span className="text-gold">Shot</span> AI
+        <Link href="/" className="text-2xl font-semibold">
+          <Logo />
         </Link>
         <Link href="/upload" className="btn-tactile font-body text-sm font-medium px-5 py-2 rounded-full border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300">
           Get Headshots
