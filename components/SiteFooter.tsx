@@ -32,7 +32,7 @@ export default function SiteFooter() {
           </div>
         </div>
         <div className="pt-6 border-t border-border/60">
-          <p className="font-body text-xs text-cream-muted/60 text-center sm:text-left">
+          <p className="font-body text-xs text-cream-muted/80 text-center sm:text-left">
             © {new Date().getFullYear()} SnapShot AI. Headshots are AI-generated from photos you provide. Uploads are deleted within 24 hours.
           </p>
         </div>

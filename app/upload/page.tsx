@@ -264,9 +264,9 @@ export default function UploadPage() {
           <div className="flex items-center justify-between mb-4">
             <span className="font-body text-sm text-cream-muted">
               {photos.length} photo{photos.length !== 1 ? 's' : ''} selected
-              {photos.length > 1 && <span className="text-cream-muted/60 ml-1">(we use the first — remove any to reorder)</span>}
+              {photos.length > 1 && <span className="text-cream-muted/80 ml-1">(we use the first — remove any to reorder)</span>}
             </span>
-            <button onClick={clearAll} className="font-body text-xs text-cream-muted hover:text-gold transition-colors">
+            <button onClick={clearAll} className="-my-3 py-3 font-body text-xs text-cream-muted hover:text-gold transition-colors">
               Clear all
             </button>
           </div>
@@ -281,7 +281,7 @@ export default function UploadPage() {
                 <button
                   onClick={() => removePhoto(i)}
                   aria-label={`Remove photo ${i + 1}`}
-                  className="absolute inset-0 flex items-center justify-center bg-obsidian/60 opacity-0 group-hover:opacity-100 transition-opacity text-cream text-lg"
+                  className="absolute inset-0 flex items-center justify-center bg-obsidian/60 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity text-cream text-lg"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                     <path d="M18 6L6 18M6 6l12 12" />

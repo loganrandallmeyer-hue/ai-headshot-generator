@@ -323,7 +323,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <p className="font-body text-[11px] text-cream-muted/60 text-center mt-4">Illustrative examples — generated from a real uploaded photo.</p>
+          <p className="font-body text-[11px] text-cream-muted/80 text-center mt-4">Illustrative examples — generated from a real uploaded photo.</p>
         </Reveal>
       </section>
 

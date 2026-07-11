@@ -66,7 +66,7 @@ export default function SiteNav() {
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
-            className="md:hidden w-10 h-10 flex items-center justify-center rounded-full border border-border text-cream"
+            className="md:hidden w-11 h-11 flex items-center justify-center rounded-full border border-border text-cream"
           >
             {open ? (
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
