@@ -7,16 +7,15 @@ Preview thumbnails for the style picker on the upload page, referenced by `previ
 
 | File | Style | Dimensions |
 |---|---|---|
-| `linkedin.jpg` | LinkedIn | 832×1216 |
-| `corporate.jpg` | Corporate | 832×1216 |
-| `executive.jpg` | Executive | 832×1216 (real photo — reused from `public/showcase/after-1.jpg`) |
-| `creative.jpg` | Creative | 832×1216 |
-| `startup.jpg` | Startup | 832×1216 |
-| `academic.jpg` | Academic | 832×1216 |
+| `linkedin.jpg` | LinkedIn | 832×1216 (real example) |
+| `corporate.jpg` | Corporate | 832×1216 (real example) |
+| `executive.jpg` | Executive | 832×1216 (real example) |
+| `creative.jpg` | Creative | 832×1216 (real example) |
+| `startup.jpg` | Startup | 832×1216 (real example) |
+| `academic.jpg` | Academic | 832×1216 (real example) |
 
-## Swapping in real examples
+## Swapping in new examples
 
-`linkedin.jpg`, `corporate.jpg`, `creative.jpg`, `startup.jpg`, and `academic.jpg` are
-still placeholder tiles. Replace each with a real AI-generated example of that style
-(same filename, 832×1216) whenever available — no code changes needed, `HEADSHOT_STYLES`
-in `lib/replicate.ts` references these paths directly.
+All six are real reference photos. To update any of them, replace the file at the
+same path/name with a new image cropped to 832×1216 — no code changes needed,
+`HEADSHOT_STYLES` in `lib/replicate.ts` references these paths directly.
