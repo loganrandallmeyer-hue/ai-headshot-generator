@@ -1,13 +1,12 @@
 import Link from 'next/link'
+import Logo from './Logo'
 
 export default function SiteFooter() {
   return (
     <footer className="px-6 py-10 border-t border-border">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
-          <span className="font-display text-xl text-cream">
-            Snap<span className="text-gold">Shot</span> AI
-          </span>
+          <Logo className="text-xl" />
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
             <a href="/#how-it-works" className="font-body text-xs text-cream-muted hover:text-cream transition-colors">How it works</a>
             <a href="/#pricing" className="font-body text-xs text-cream-muted hover:text-cream transition-colors">Pricing</a>

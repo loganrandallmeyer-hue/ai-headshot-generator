@@ -187,6 +187,31 @@ body {
 .section-py-lg { padding-top: var(--space-lg); padding-bottom: var(--space-lg); }
 .section-py-xl { padding-top: var(--space-xl); padding-bottom: var(--space-xl); }
 
+/* Fluid typography ramp — replaces fixed text-5xl/7xl style breakpoints */
+.t-display { font-size: var(--fs-display); line-height: .95; letter-spacing: -.02em; }
+.t-h1 { font-size: var(--fs-h1); line-height: 1; letter-spacing: -.015em; }
+.t-h2 { font-size: var(--fs-h2); line-height: 1.08; letter-spacing: -.01em; }
+.t-body { font-size: var(--fs-body); line-height: 1.6; }
+
+/* Material & elevation tiers — replaces the single flat card style */
+.surface-base {
+  background: rgba(20, 20, 20, 0.4);
+  border: 1px solid #2A2A2A;
+  box-shadow: var(--shadow-1);
+}
+.surface-raised {
+  background: rgba(20, 20, 20, 0.55);
+  border: 1px solid #2A2A2A;
+  border-top-color: rgba(240, 235, 224, 0.08);
+  box-shadow: var(--shadow-2);
+}
+.surface-hero {
+  background: rgba(20, 20, 20, 0.6);
+  border: 1px solid rgba(201, 165, 80, 0.35);
+  border-top-color: rgba(240, 235, 224, 0.12);
+  box-shadow: var(--shadow-3), var(--glow-gold);
+}
+
 /* Animated gold underline for links */
 .link-underline {
   position: relative;
@@ -203,6 +228,21 @@ body {
 }
 .link-underline:hover::after {
   width: 100%;
+}
+
+/* Lightweight CSS-only preloader — fades out on load, no JS */
+.preloader-fade {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: var(--obsidian);
+  pointer-events: none;
+  animation: preloaderFade 0.55s var(--ease-out) forwards;
+  animation-delay: 0.05s;
+}
+@keyframes preloaderFade {
+  0% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
 }
 
 /* Slow pulse for "live" status dots */

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import Logo from './Logo'
 
 const LINKS = [
   { href: '#how-it-works', label: 'How it works' },
@@ -40,8 +41,8 @@ export default function SiteNav() {
         style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #C9A550, #E2C06A)' }} />
 
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
-        <Link href="/" className="font-display text-2xl font-semibold tracking-wide text-cream">
-          Snap<span className="text-gold">Shot</span> AI
+        <Link href="/" className="text-2xl font-semibold">
+          <Logo />
         </Link>
 
         <div className="hidden md:flex items-center gap-8">

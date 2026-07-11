@@ -47,7 +47,7 @@ function SuccessContent() {
 
       <p className="font-body text-xs tracking-widest uppercase text-gold mb-4">Payment Confirmed</p>
 
-      <h1 className="font-display text-5xl md:text-7xl font-light text-cream mb-6 leading-tight">
+      <h1 className="font-display t-h1 font-light text-cream mb-6">
         Your headshots<br />
         <em className="gold-shimmer not-italic">are being created</em>
       </h1>

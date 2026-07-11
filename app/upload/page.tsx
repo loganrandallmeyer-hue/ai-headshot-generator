@@ -194,7 +194,7 @@ export default function UploadPage() {
         <Stepper current={1} />
         <div className="text-center mb-12">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Free preview · Step 1</p>
-          <h1 className="font-display text-5xl font-light text-cream mb-4">Upload Your Photos</h1>
+          <h1 className="font-display t-h1 font-light text-cream mb-4">Upload Your Photos</h1>
           <p className="font-body text-sm text-cream-muted leading-relaxed">
             Upload <strong className="text-cream">one clear, well-lit photo</strong> of yourself &mdash;
             our AI transforms it into professional headshots while keeping your exact likeness.

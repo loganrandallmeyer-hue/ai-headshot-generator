@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import Preloader from '../components/Preloader'
 import './globals.css'
 
 const display = Cormorant_Garamond({
@@ -50,7 +51,10 @@ export default function RootLayout({
           <style>{`.reveal{opacity:1 !important;transform:none !important}`}</style>
         </noscript>
       </head>
-      <body className="grain">{children}</body>
+      <body className="grain">
+        <Preloader />
+        {children}
+      </body>
     </html>
   )
 }

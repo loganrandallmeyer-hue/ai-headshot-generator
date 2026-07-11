@@ -162,7 +162,7 @@ function PreviewContent() {
         <Stepper current={2} />
         <div className="text-center mb-12">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Almost done · Step 2</p>
-          <h1 className="font-display text-5xl font-light text-cream mb-4">
+          <h1 className="font-display t-h1 font-light text-cream mb-4">
             Your Preview Is Ready
           </h1>
           <p className="font-body text-sm text-cream-muted">

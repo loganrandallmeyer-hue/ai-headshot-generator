@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import Reveal from '../components/Reveal'
 import SiteNav from '../components/SiteNav'
@@ -138,7 +139,7 @@ export default function LandingPage() {
               <span className="font-body text-xs text-gold tracking-widest uppercase">Free preview · Delivered in 30 minutes</span>
             </div>
 
-            <h1 className="animate-fade-up delay-100 font-display text-5xl md:text-7xl font-light leading-[0.95] tracking-tight mb-6">
+            <h1 className="animate-fade-up delay-100 font-display t-display font-light mb-6">
               Professional headshots,<br />
               <em className="text-gold not-italic font-medium">without the studio.</em>
             </h1>
@@ -194,7 +195,7 @@ export default function LandingPage() {
       <section className="px-6 section-py-lg max-w-6xl mx-auto">
         <Reveal className="text-center mb-14">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Built on Trust</p>
-          <h2 className="font-display text-4xl md:text-5xl font-light text-cream">You see the quality before you spend a cent</h2>
+          <h2 className="font-display t-h2 font-light text-cream">You see the quality before you spend a cent</h2>
           <p className="font-body text-sm text-cream-muted mt-4 max-w-2xl mx-auto leading-relaxed">
             Most headshot services ask you to pay upfront and hope for the best. We flipped that: your first result is a free, watermarked preview generated from your own photos.
           </p>
@@ -202,7 +203,7 @@ export default function LandingPage() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {TRUST_POINTS.map(({ icon, title, desc }, i) => (
             <Reveal key={title} delay={i * 80}>
-              <div className="lift h-full p-6 rounded-2xl border border-border bg-charcoal/50 hover:border-gold/40">
+              <div className="lift surface-base h-full p-6 rounded-2xl hover:border-gold/40">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center text-gold mb-4 border border-gold/25 bg-gold/5">
                   {icon}
                 </div>
@@ -221,12 +222,12 @@ export default function LandingPage() {
             <span className="h-px w-8 bg-gold" />
             <p className="font-body text-xs tracking-widest uppercase text-gold">Process</p>
           </div>
-          <h2 className="font-display text-4xl md:text-5xl font-light text-cream">Three steps to a better first impression</h2>
+          <h2 className="font-display t-h2 font-light text-cream">Three steps to a better first impression</h2>
         </Reveal>
         <div className="grid md:grid-cols-3 gap-8">
           {STEPS.map(({ number, title, desc }, i) => (
             <Reveal key={number} delay={i * 100}>
-              <div className="lift relative h-full p-8 rounded-2xl border border-border bg-charcoal/50 hover:border-gold/40">
+              <div className="lift surface-raised relative h-full p-8 rounded-2xl hover:border-gold/40">
                 <div className="font-display text-6xl font-semibold text-gold/20 mb-4 leading-none">{number}</div>
                 <h3 className="font-display text-2xl font-medium text-cream mb-3">{title}</h3>
                 <p className="font-body text-sm text-cream-muted leading-relaxed">{desc}</p>
@@ -240,7 +241,7 @@ export default function LandingPage() {
       <section className="px-6 section-py-md max-w-5xl mx-auto">
         <Reveal className="text-center mb-14">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">The Math</p>
-          <h2 className="font-display text-4xl md:text-5xl font-light text-cream">A fraction of the cost. None of the hassle.</h2>
+          <h2 className="font-display t-h2 font-light text-cream">A fraction of the cost. None of the hassle.</h2>
         </Reveal>
         <div className="grid md:grid-cols-2 gap-5 items-center">
           <Reveal>
@@ -259,7 +260,7 @@ export default function LandingPage() {
             </div>
           </Reveal>
           <Reveal delay={100}>
-            <div className="relative z-10 h-full p-8 rounded-2xl border border-gold/40 bg-gold/[0.04] shadow-[var(--shadow-3)]" style={{ boxShadow: 'var(--shadow-3), var(--glow-gold)' }}>
+            <div className="surface-hero relative z-10 h-full p-8 rounded-2xl">
               <p className="font-body text-xs tracking-widest uppercase text-gold mb-5">SnapShot AI</p>
               <ul className="space-y-3">
                 {COMPARE.snapshot.map((item) => (
@@ -283,7 +284,7 @@ export default function LandingPage() {
             <span className="h-px w-8 bg-gold" />
             <p className="font-body text-xs tracking-widest uppercase text-gold">Styles</p>
           </div>
-          <h2 className="font-display text-4xl md:text-5xl font-light text-cream">Every style. Every industry.</h2>
+          <h2 className="font-display t-h2 font-light text-cream">Every style. Every industry.</h2>
           <p className="font-body text-sm text-cream-muted mt-4">
             Standard and Premium packages include multiple background styles so your set works everywhere you need it.
           </p>
@@ -291,13 +292,39 @@ export default function LandingPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {STYLES.map(({ name, desc }, i) => (
             <Reveal key={name} delay={i * 60}>
-              <div className="lift h-full p-6 rounded-2xl border border-border bg-charcoal/40 hover:border-gold/40">
+              <div className="lift surface-base h-full p-6 rounded-2xl hover:border-gold/40">
                 <p className="font-display text-xl text-cream mb-1">{name}</p>
                 <p className="font-body text-xs text-cream-muted leading-relaxed">{desc}</p>
               </div>
             </Reveal>
           ))}
         </div>
+
+        {/* Styles proof strip — layered trio of real generated examples */}
+        <Reveal className="mt-14">
+          <div className="flex justify-center items-end -space-x-6 sm:-space-x-10">
+            {[
+              { src: '/showcase/after-2.jpg', label: 'Corporate', rotate: '-rotate-3', z: 'z-10' },
+              { src: '/showcase/after-3.jpg', label: 'Creative', rotate: 'rotate-0', z: 'z-20 scale-110' },
+              { src: '/showcase/after-4.jpg', label: 'Startup', rotate: 'rotate-3', z: 'z-10' },
+            ].map((card) => (
+              <div key={card.label} className={`relative ${card.rotate} ${card.z} w-28 sm:w-36 shrink-0`}>
+                <div className="relative aspect-[832/1216] overflow-hidden rounded-xl border border-gold/25 shadow-[var(--shadow-2)]">
+                  <Image
+                    src={card.src}
+                    alt={`Polished AI-generated headshot — ${card.label} style`}
+                    width={832}
+                    height={1216}
+                    sizes="150px"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <span className="mt-2 block text-center font-body text-[11px] tracking-wide text-cream-muted">{card.label}</span>
+              </div>
+            ))}
+          </div>
+          <p className="font-body text-[11px] text-cream-muted/60 text-center mt-4">Illustrative examples — generated from a real uploaded photo.</p>
+        </Reveal>
       </section>
 
       {/* PRICING */}
@@ -305,14 +332,14 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <Reveal className="text-center mb-12">
             <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Pricing</p>
-            <h2 className="font-display text-4xl md:text-5xl font-light text-cream">Simple. One-time. Fair.</h2>
+            <h2 className="font-display t-h2 font-light text-cream">Simple. One-time. Fair.</h2>
             <p className="font-body text-sm text-cream-muted mt-3">Preview is always free. Pay only when you like what you see.</p>
           </Reveal>
 
           <div className="grid md:grid-cols-3 gap-6 md:items-center">
 
             <Reveal>
-              <div className="lift rounded-2xl border border-border bg-charcoal/50 p-8 flex flex-col h-full hover:border-gold/40 lg:mt-6">
+              <div className="lift surface-base rounded-2xl p-8 flex flex-col h-full hover:border-gold/40 lg:mt-6">
                 <p className="font-body text-xs tracking-widest uppercase text-cream-muted mb-2">Basic</p>
                 <div className="font-display text-5xl font-semibold text-cream mb-1">$9.99</div>
                 <p className="font-body text-xs text-cream-muted mb-6">one-time · no subscription</p>
@@ -353,7 +380,7 @@ export default function LandingPage() {
             </Reveal>
 
             <Reveal delay={200}>
-              <div className="lift rounded-2xl border border-border bg-charcoal/50 p-8 flex flex-col h-full hover:border-gold/40 lg:mt-6">
+              <div className="lift surface-base rounded-2xl p-8 flex flex-col h-full hover:border-gold/40 lg:mt-6">
                 <div className="flex items-center justify-between mb-2">
                   <p className="font-body text-xs tracking-widest uppercase text-cream-muted">Premium</p>
                   <span className="px-2 py-0.5 rounded-full border border-gold/40 text-gold font-body text-[10px] tracking-wider uppercase">Best value</span>
@@ -383,7 +410,7 @@ export default function LandingPage() {
       {/* GUARANTEE — risk reversal */}
       <section className="px-6 section-py-md">
         <Reveal className="max-w-4xl mx-auto">
-          <div className="relative rounded-3xl border border-gold/30 bg-charcoal/40 p-10 md:p-14 text-center overflow-hidden">
+          <div className="relative rounded-3xl border border-gold/30 bg-charcoal/40 shadow-[var(--shadow-2)] p-10 md:p-14 text-center overflow-hidden">
             <div className="absolute inset-0 pointer-events-none"
               style={{ background: 'radial-gradient(ellipse 50% 60% at 50% 0%, rgba(201,165,80,0.10) 0%, transparent 70%)' }} />
             <div className="relative">
@@ -392,7 +419,7 @@ export default function LandingPage() {
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" />
                 </svg>
               </div>
-              <h2 className="font-display text-3xl md:text-4xl font-light text-cream mb-4">Our whole model is the guarantee</h2>
+              <h2 className="font-display t-h2 font-light text-cream mb-4">Our whole model is the guarantee</h2>
               <p className="font-body text-base text-cream-muted max-w-2xl mx-auto leading-relaxed">
                 You never pay to find out if it worked. We generate a real preview from your own photo, watermarked, for free — and you decide from there. No surprises, no risk, no reason to hesitate.
               </p>
@@ -405,7 +432,7 @@ export default function LandingPage() {
       <section id="faq" className="px-6 section-py-lg max-w-3xl mx-auto scroll-mt-20">
         <Reveal className="text-center mb-12">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">FAQ</p>
-          <h2 className="font-display text-4xl font-light text-cream">Questions answered</h2>
+          <h2 className="font-display t-h2 font-light text-cream">Questions answered</h2>
         </Reveal>
         <Reveal>
           <FAQ items={FAQS} />
@@ -417,7 +444,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: 'radial-gradient(ellipse 50% 60% at 50% 50%, rgba(201,165,80,0.06) 0%, transparent 70%)' }} />
         <Reveal>
-          <h2 className="font-display text-4xl md:text-6xl font-light text-cream mb-4 relative">
+          <h2 className="font-display t-h2 font-light text-cream mb-4 relative">
             See your headshots<br />
             <em className="text-gold not-italic">before you decide.</em>
           </h2>
