@@ -42,6 +42,18 @@ export async function POST(req: NextRequest) {
     // We store only the preview prediction ID. The webhook recovers the
     // customer's photos from the Replicate prediction record — photo data
     // is far too large for Stripe metadata (500 chars/value, 50 keys).
+    //
+    // Redirect back to the domain the customer is actually on. Deriving this
+    // from the request means a missing or placeholder NEXT_PUBLIC_BASE_URL can
+    // never send paying customers to the wrong site (e.g. a Vercel login page).
+    const configuredBase = process.env.NEXT_PUBLIC_BASE_URL
+    const baseUrl =
+      req.headers.get('origin') ||
+      (configuredBase && !configuredBase.includes('your-app.vercel.app')
+        ? configuredBase
+        : null) ||
+      req.nextUrl.origin
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
@@ -67,8 +79,8 @@ export async function POST(req: NextRequest) {
         prediction_id: predictionId,
       },
       expires_at: Math.floor(Date.now() / 1000) + 31 * 60, // Stripe minimum is 30 min
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?email=${encodeURIComponent(email)}&session_id=${sessionId}&tier=${tier}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/upload`,
+      success_url: `${baseUrl}/success?email=${encodeURIComponent(email)}&session_id=${sessionId}&tier=${tier}`,
+      cancel_url: `${baseUrl}/upload`,
     })
 
     return NextResponse.json({ checkoutUrl: session.url })
