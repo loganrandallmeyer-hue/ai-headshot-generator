@@ -67,12 +67,12 @@ const STEPS = [
 ]
 
 const STYLES = [
-  { name: 'LinkedIn', desc: 'Clean, approachable, business-casual' },
-  { name: 'Corporate', desc: 'Formal attire, neutral studio backdrop' },
-  { name: 'Executive', desc: 'Commanding presence, dark tones' },
-  { name: 'Creative', desc: 'Relaxed, modern, personality-forward' },
-  { name: 'Startup', desc: 'Smart-casual, bright and energetic' },
-  { name: 'Academic', desc: 'Professional, understated, credible' },
+  { id: 'linkedin', name: 'LinkedIn', desc: 'Clean, approachable, business-casual' },
+  { id: 'corporate', name: 'Corporate', desc: 'Formal attire, neutral studio backdrop' },
+  { id: 'executive', name: 'Executive', desc: 'Commanding presence, dark tones' },
+  { id: 'creative', name: 'Creative', desc: 'Relaxed, modern, personality-forward' },
+  { id: 'startup', name: 'Startup', desc: 'Smart-casual, bright and energetic' },
+  { id: 'academic', name: 'Academic', desc: 'Professional, understated, credible' },
 ]
 
 const COMPARE = {
@@ -290,29 +290,42 @@ export default function LandingPage() {
           </p>
         </Reveal>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {STYLES.map(({ name, desc }, i) => (
-            <Reveal key={name} delay={i * 60}>
-              <div className="lift surface-base h-full p-6 rounded-2xl hover:border-gold/40">
-                <p className="font-display text-xl text-cream mb-1">{name}</p>
-                <p className="font-body text-xs text-cream-muted leading-relaxed">{desc}</p>
+          {STYLES.map(({ id, name, desc }, i) => (
+            <Reveal key={id} delay={i * 60}>
+              <div className="lift surface-base h-full rounded-2xl overflow-hidden hover:border-gold/40">
+                <div className="relative aspect-[832/1216]">
+                  <Image
+                    src={`/styles/${id}.jpg`}
+                    alt={`${name} style example`}
+                    width={832}
+                    height={1216}
+                    sizes="(max-width: 768px) 45vw, 220px"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-obsidian/90 via-obsidian/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <p className="font-display text-xl text-cream mb-1">{name}</p>
+                    <p className="font-body text-xs text-cream-muted leading-relaxed">{desc}</p>
+                  </div>
+                </div>
               </div>
             </Reveal>
           ))}
         </div>
 
-        {/* Styles proof strip — layered trio of real generated examples */}
+        {/* Styles proof strip — layered trio of real examples */}
         <Reveal className="mt-14">
           <div className="flex justify-center items-end -space-x-6 sm:-space-x-10">
             {[
-              { src: '/showcase/after-2.jpg', label: 'Corporate', rotate: '-rotate-3', z: 'z-10' },
-              { src: '/showcase/after-3.jpg', label: 'Creative', rotate: 'rotate-0', z: 'z-20 scale-110' },
-              { src: '/showcase/after-4.jpg', label: 'Startup', rotate: 'rotate-3', z: 'z-10' },
+              { id: 'corporate', label: 'Corporate', rotate: '-rotate-3', z: 'z-10' },
+              { id: 'creative', label: 'Creative', rotate: 'rotate-0', z: 'z-20 scale-110' },
+              { id: 'startup', label: 'Startup', rotate: 'rotate-3', z: 'z-10' },
             ].map((card) => (
               <div key={card.label} className={`relative ${card.rotate} ${card.z} w-28 sm:w-36 shrink-0`}>
                 <div className="relative aspect-[832/1216] overflow-hidden rounded-xl border border-gold/25 shadow-[var(--shadow-2)]">
                   <Image
-                    src={card.src}
-                    alt={`Polished AI-generated headshot — ${card.label} style`}
+                    src={`/styles/${card.id}.jpg`}
+                    alt={`${card.label} style example`}
                     width={832}
                     height={1216}
                     sizes="150px"
@@ -323,7 +336,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <p className="font-body text-[11px] text-cream-muted/80 text-center mt-4">Illustrative examples — generated from a real uploaded photo.</p>
+          <p className="font-body text-[11px] text-cream-muted/80 text-center mt-4">Illustrative examples — your results are generated from your own photo.</p>
         </Reveal>
       </section>
 
