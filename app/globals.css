@@ -93,3 +93,95 @@ body {
   border-color: #C9A550 !important;
   background-color: rgba(201, 165, 80, 0.05) !important;
 }
+
+/* Text selection */
+::selection {
+  background: rgba(201, 165, 80, 0.28);
+  color: #F0EBE0;
+}
+
+/* Accessible keyboard focus — visible gold ring, never on mouse click */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Scroll-reveal: elements start hidden, animate in when observed.
+   Falls back to fully visible if JS/IntersectionObserver is unavailable. */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Accordion open/close height transition (max-height technique) */
+.accordion-panel {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.4s ease;
+}
+.accordion-panel.open {
+  max-height: 480px;
+  opacity: 1;
+}
+
+/* Card lift on hover — premium tactile feedback */
+.lift {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Animated gold underline for links */
+.link-underline {
+  position: relative;
+}
+.link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 1px;
+  width: 0;
+  background: var(--gold);
+  transition: width 0.3s ease;
+}
+.link-underline:hover::after {
+  width: 100%;
+}
+
+/* Slow pulse for "live" status dots */
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(201,165,80,0.5); }
+  50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(201,165,80,0); }
+}
+.pulse-soft { animation: pulseSoft 2.4s ease-in-out infinite; }
+
+/* Respect users who prefer reduced motion — disable all motion */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1 !important; transform: none !important; }
+  .gold-shimmer {
+    -webkit-text-fill-color: var(--gold);
+    background: none;
+    color: var(--gold);
+  }
+}

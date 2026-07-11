@@ -2,17 +2,38 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
+import Stepper from '../../components/Stepper'
 
 function SuccessContent() {
   const params = useSearchParams()
   const email = params.get('email') || 'your inbox'
+  const [copied, setCopied] = useState(false)
+
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.origin : 'https://snapshotai.app'
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'SnapShot AI', text: 'Professional AI headshots with a free preview', url })
+      } else {
+        await navigator.clipboard.writeText(url)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }
+    } catch {
+      /* user dismissed the share sheet — no action needed */
+    }
+  }
 
   return (
     <main className="min-h-screen bg-obsidian text-cream flex flex-col items-center justify-center px-6 text-center">
       {/* Glow */}
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: 'radial-gradient(ellipse 50% 40% at 50% 50%, rgba(201,165,80,0.08) 0%, transparent 70%)' }} />
+
+      <div className="w-full max-w-sm relative">
+        <Stepper current={3} />
+      </div>
 
       {/* Icon */}
       <div
@@ -55,6 +76,31 @@ function SuccessContent() {
             </li>
           ))}
         </ul>
+      </div>
+
+      {/* Referral / share */}
+      <div className="max-w-md w-full p-6 rounded-2xl border border-gold/25 bg-gold/[0.03] mb-10 text-center">
+        <p className="font-body text-sm text-cream mb-1">Know someone who needs a great headshot?</p>
+        <p className="font-body text-xs text-cream-muted mb-4">They can preview theirs free too — no payment to try.</p>
+        <button
+          onClick={handleShare}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-body text-sm font-medium border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300"
+        >
+          {copied ? (
+            <>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+              Link copied
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
+              </svg>
+              Share SnapShot AI
+            </>
+          )}
+        </button>
       </div>
 
       <Link

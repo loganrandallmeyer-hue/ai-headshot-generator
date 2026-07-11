@@ -10,3 +10,7 @@ tsconfig.tsbuildinfo
 
 # Vercel
 .vercel
+
+# temp typecheck/test build
+.ttmp/
+tsconfig.rendertest.json

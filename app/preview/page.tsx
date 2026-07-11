@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Stepper from '../../components/Stepper'
 
 const TIERS = [
   {
@@ -11,6 +12,7 @@ const TIERS = [
     price: '$9.99',
     priceCents: 999,
     description: 'Perfect if you just need one great shot.',
+    perPhoto: '',
     features: ['1 professional headshot', 'Studio lighting', 'High resolution'],
   },
   {
@@ -19,6 +21,7 @@ const TIERS = [
     price: '$19.99',
     priceCents: 1999,
     description: 'Great variety across three styles.',
+    perPhoto: '≈ $1.33 / photo',
     features: ['15 professional headshots', '3 background styles', 'High resolution'],
     popular: true,
   },
@@ -28,6 +31,7 @@ const TIERS = [
     price: '$24.99',
     priceCents: 2499,
     description: 'The full set — maximum variety.',
+    perPhoto: '≈ $0.83 / photo',
     features: ['30 professional headshots', '5 background styles', 'High resolution', 'Best value'],
   },
 ]
@@ -155,8 +159,9 @@ function PreviewContent() {
       <div className="max-w-5xl mx-auto px-6 py-16">
 
         {/* Header */}
+        <Stepper current={2} />
         <div className="text-center mb-12">
-          <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Step 2 of 2</p>
+          <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Almost done · Step 2</p>
           <h1 className="font-display text-5xl font-light text-cream mb-4">
             Your Preview Is Ready
           </h1>
@@ -194,7 +199,10 @@ function PreviewContent() {
 
           {/* Tier Selection */}
           <div>
-            <p className="font-body text-xs uppercase tracking-widest text-cream-muted mb-3">Choose Your Package</p>
+            <p className="font-body text-xs uppercase tracking-widest text-cream-muted mb-2">Choose Your Package</p>
+            <p className="font-body text-xs text-cream-muted/80 mb-4 leading-relaxed">
+              A studio session typically runs <span className="text-cream">$150–400</span>. Your full set starts at <span className="text-gold">$9.99</span> — one-time.
+            </p>
 
             <div className="flex flex-col gap-3 mb-6">
               {TIERS.map((tier) => (
@@ -216,7 +224,10 @@ function PreviewContent() {
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-display text-lg text-cream">{tier.label}</span>
                     <div className="flex items-center gap-3">
-                      <span className="font-display text-2xl text-gold">{tier.price}</span>
+                      <span className="flex flex-col items-end leading-tight">
+                        <span className="font-display text-2xl text-gold">{tier.price}</span>
+                        {tier.perPhoto && <span className="font-body text-[10px] text-cream-muted">{tier.perPhoto}</span>}
+                      </span>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
                         selectedTier === tier.id ? 'border-gold bg-gold' : 'border-border'
                       }`}>
@@ -239,7 +250,7 @@ function PreviewContent() {
             </div>
 
             {error && (
-              <div className="mb-4 px-4 py-3 rounded-xl border border-red-800 bg-red-900/20">
+              <div role="alert" className="mb-4 px-4 py-3 rounded-xl border border-red-800 bg-red-900/20">
                 <p className="font-body text-sm text-red-400">{error}</p>
               </div>
             )}
@@ -261,8 +272,18 @@ function PreviewContent() {
               )}
             </button>
 
-            <p className="font-body text-xs text-cream-muted text-center mt-4">
-              Secured by Stripe · Headshots delivered to <strong className="text-cream">{email}</strong>
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mt-4">
+              {['Secured by Stripe', 'Watermark removed', 'Delivered in ~30 min', 'Commercial license'].map((t) => (
+                <span key={t} className="flex items-center gap-1.5 font-body text-[11px] text-cream-muted">
+                  <svg className="w-3 h-3 text-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  {t}
+                </span>
+              ))}
+            </div>
+            <p className="font-body text-xs text-cream-muted text-center mt-3">
+              Headshots delivered to <strong className="text-cream">{email}</strong>
             </p>
           </div>
         </div>

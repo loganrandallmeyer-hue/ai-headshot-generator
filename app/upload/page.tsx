@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Link from 'next/link'
+import Stepper from '../../components/Stepper'
 
 interface PhotoItem {
   file: File
@@ -190,8 +191,9 @@ export default function UploadPage() {
       </nav>
 
       <div className="max-w-2xl mx-auto px-6 py-16">
+        <Stepper current={1} />
         <div className="text-center mb-12">
-          <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Step 1 of 2</p>
+          <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Free preview · Step 1</p>
           <h1 className="font-display text-5xl font-light text-cream mb-4">Upload Your Photos</h1>
           <p className="font-body text-sm text-cream-muted leading-relaxed">
             Upload <strong className="text-cream">one clear, well-lit photo</strong> of yourself &mdash;
@@ -303,12 +305,12 @@ export default function UploadPage() {
         </div>
 
         {error && (
-          <div className="mb-6 px-4 py-3 rounded-xl border border-red-800 bg-red-900/20">
+          <div role="alert" className="mb-6 px-4 py-3 rounded-xl border border-red-800 bg-red-900/20">
             <p className="font-body text-sm text-red-400">{error}</p>
           </div>
         )}
 
-        <div className="mb-6">
+        <div className="mb-6" aria-live="polite">
           <div className="flex justify-between font-body text-xs text-cream-muted mb-1">
             {loading ? (
               <><span>{statusMsg}</span><span>{uploadProgress}%</span></>

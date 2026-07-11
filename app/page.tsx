@@ -1,6 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import Reveal from '../components/Reveal'
+import SiteNav from '../components/SiteNav'
+import SiteFooter from '../components/SiteFooter'
+import StickyBuyBar from '../components/StickyBuyBar'
+import FAQ from '../components/FAQ'
 
 const TRUST_POINTS = [
   {
@@ -68,6 +73,25 @@ const STYLES = [
   { name: 'Academic', desc: 'Professional, understated, credible' },
 ]
 
+const COMPARE = {
+  studio: [
+    'Typically $150–400+ per session',
+    'Book days or weeks ahead',
+    'Travel to a studio, on their schedule',
+    'Usually one outfit and one look',
+    'Reshoots cost extra',
+    'Hours out of your day',
+  ],
+  snapshot: [
+    'From $9.99 — one-time, no subscription',
+    'Ready in about 30 minutes',
+    'From your couch, whenever you want',
+    'Up to 5 professional styles',
+    'Free watermarked preview before you pay',
+    'One clear photo is all you need',
+  ],
+}
+
 const FAQS = [
   {
     q: 'How realistic do the headshots look?',
@@ -95,74 +119,101 @@ const FAQS = [
   },
 ]
 
+/** Neutral portrait glyph — an illustrative stand-in, never a real customer photo. */
+function PortraitGlyph({ tone = '#0d0d0d' }: { tone?: string }) {
+  return (
+    <svg viewBox="0 0 100 120" className="w-full h-full" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+      <circle cx="50" cy="42" r="20" fill={tone} opacity="0.55" />
+      <path d="M18 118c0-19 15-32 32-32s32 13 32 32z" fill={tone} opacity="0.55" />
+    </svg>
+  )
+}
+
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-obsidian text-cream overflow-x-hidden">
-
-      {/* NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/60"
-        style={{ background: 'rgba(9,9,9,0.85)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
-          <Link href="/" className="font-display text-2xl font-semibold tracking-wide text-cream">
-            Snap<span className="text-gold">Shot</span> AI
-          </Link>
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="font-body text-sm text-cream-muted hover:text-cream transition-colors">How it works</a>
-            <a href="#pricing" className="font-body text-sm text-cream-muted hover:text-cream transition-colors">Pricing</a>
-            <a href="#faq" className="font-body text-sm text-cream-muted hover:text-cream transition-colors">FAQ</a>
-          </div>
-          <Link
-            href="/upload"
-            className="font-body text-sm font-medium px-5 py-2 rounded-full border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300"
-          >
-            Get Headshots
-          </Link>
-        </div>
-      </nav>
+      <SiteNav />
 
       {/* HERO */}
-      <section className="relative flex flex-col items-center justify-center px-6 pt-40 pb-24 text-center">
+      <section className="relative px-6 pt-36 pb-20 md:pt-44 md:pb-28">
         <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 35%, rgba(201,165,80,0.08) 0%, transparent 70%)' }} />
+          style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 25%, rgba(201,165,80,0.08) 0%, transparent 70%)' }} />
 
-        <div className="animate-fade-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-          <span className="font-body text-xs text-gold tracking-widest uppercase">Free preview · Delivered in 30 minutes</span>
-        </div>
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 items-center relative">
+          {/* Copy */}
+          <div className="text-center lg:text-left">
+            <div className="animate-fade-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 mb-8">
+              <span className="w-1.5 h-1.5 rounded-full bg-gold pulse-soft" />
+              <span className="font-body text-xs text-gold tracking-widest uppercase">Free preview · Delivered in 30 minutes</span>
+            </div>
 
-        <h1 className="animate-fade-up delay-100 font-display text-5xl md:text-7xl lg:text-8xl font-light leading-[0.95] tracking-tight mb-6 max-w-4xl">
-          Professional headshots,<br />
-          <em className="text-gold not-italic font-medium">without the studio.</em>
-        </h1>
+            <h1 className="animate-fade-up delay-100 font-display text-5xl md:text-7xl font-light leading-[0.95] tracking-tight mb-6">
+              Professional headshots,<br />
+              <em className="text-gold not-italic font-medium">without the studio.</em>
+            </h1>
 
-        <p className="animate-fade-up delay-200 font-body text-lg md:text-xl text-cream-muted max-w-xl mx-auto mb-10 leading-relaxed">
-          Upload one clear photo. Preview your AI-generated headshots free — then pick a package from $9.99. One-time payment, no subscription.
-        </p>
+            <p className="animate-fade-up delay-200 font-body text-lg md:text-xl text-cream-muted max-w-xl mx-auto lg:mx-0 mb-9 leading-relaxed">
+              Upload one clear photo. Preview your AI-generated headshots free — then pick a package from $9.99. One-time payment, no subscription.
+            </p>
 
-        <div className="animate-fade-up delay-300 flex flex-col sm:flex-row items-center gap-5">
-          <Link
-            href="/upload"
-            className="gold-glow inline-flex items-center gap-3 px-8 py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300 hover:scale-105 hover:shadow-lg"
-            style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
-          >
-            <span>Try It Free — See Your Preview</span>
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
-            </svg>
-          </Link>
-          <p className="font-body text-sm text-cream-muted">No payment required to preview</p>
-        </div>
+            <div className="animate-fade-up delay-300 flex flex-col sm:flex-row items-center lg:items-start gap-4">
+              <Link
+                href="/upload"
+                className="gold-glow inline-flex items-center gap-3 px-8 py-4 rounded-full font-body font-medium text-obsidian transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
+              >
+                <span>Try It Free — See Your Preview</span>
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
+                </svg>
+              </Link>
+              <p className="font-body text-sm text-cream-muted sm:pt-4">No payment required to preview</p>
+            </div>
 
-        {/* Honest trust strip */}
-        <div className="animate-fade-up delay-400 mt-16 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
-          {['Preview before you pay', 'Secured by Stripe', 'Photos deleted in 24h', 'Commercial license included'].map((item) => (
-            <span key={item} className="flex items-center gap-2 font-body text-xs text-cream-muted tracking-wide">
-              <svg className="w-3.5 h-3.5 text-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
-              {item}
-            </span>
-          ))}
+            {/* Honest trust strip */}
+            <div className="animate-fade-up delay-400 mt-12 flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-3">
+              {['Preview before you pay', 'Secured by Stripe', 'Photos deleted in 24h', 'Commercial license'].map((item) => (
+                <span key={item} className="flex items-center gap-2 font-body text-xs text-cream-muted tracking-wide">
+                  <svg className="w-3.5 h-3.5 text-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Illustrative process visual — abstract silhouettes, not real people */}
+          <div className="animate-fade-up delay-300 relative hidden lg:block">
+            <div className="relative mx-auto max-w-md">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { label: 'Your photo', tag: 'Before', bg: 'linear-gradient(145deg, #262019, #171310)', tone: '#8a7a5c', dim: true },
+                  { label: 'Corporate', tag: 'After', bg: 'linear-gradient(145deg, #ededed, #cccccc)', tone: '#3a3a3a', dim: false },
+                  { label: 'Executive', tag: 'After', bg: 'linear-gradient(145deg, #0d0d0d, #242424)', tone: '#b9a06a', dim: false },
+                  { label: 'Outdoor', tag: 'After', bg: 'linear-gradient(145deg, #2a3524, #48583a)', tone: '#dfe4d3', dim: false },
+                ].map((card, i) => (
+                  <div
+                    key={card.label}
+                    className={`relative rounded-2xl overflow-hidden border border-border ${i % 2 === 1 ? 'translate-y-6' : ''}`}
+                    style={{ background: card.bg, aspectRatio: '3 / 4' }}
+                  >
+                    <div className="absolute inset-0 p-6 opacity-90">
+                      <PortraitGlyph tone={card.tone} />
+                    </div>
+                    <span
+                      className={`absolute top-3 left-3 px-2 py-0.5 rounded-full text-[9px] font-body font-semibold tracking-wider uppercase ${card.dim ? 'bg-obsidian/70 text-cream-muted' : 'text-obsidian'}`}
+                      style={card.dim ? undefined : { background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
+                    >
+                      {card.tag}
+                    </span>
+                    <span className="absolute bottom-3 left-3 font-body text-[11px] tracking-wide text-cream/90">{card.label}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="font-body text-[11px] text-cream-muted/60 text-center mt-8">Illustration of the transformation — your results are generated from your own photo.</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -172,58 +223,104 @@ export default function LandingPage() {
 
       {/* WHY TRUST US */}
       <section className="px-6 py-24 max-w-6xl mx-auto">
-        <div className="text-center mb-14">
+        <Reveal className="text-center mb-14">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Built on Trust</p>
           <h2 className="font-display text-4xl md:text-5xl font-light text-cream">You see the quality before you spend a cent</h2>
           <p className="font-body text-sm text-cream-muted mt-4 max-w-2xl mx-auto leading-relaxed">
             Most headshot services ask you to pay upfront and hope for the best. We flipped that: your first result is a free, watermarked preview generated from your own photos.
           </p>
-        </div>
+        </Reveal>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {TRUST_POINTS.map(({ icon, title, desc }) => (
-            <div key={title} className="p-6 rounded-2xl border border-border bg-charcoal/50 hover:border-gold/40 transition-colors duration-300">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-gold mb-4 border border-gold/25 bg-gold/5">
-                {icon}
+          {TRUST_POINTS.map(({ icon, title, desc }, i) => (
+            <Reveal key={title} delay={i * 80}>
+              <div className="lift h-full p-6 rounded-2xl border border-border bg-charcoal/50 hover:border-gold/40">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-gold mb-4 border border-gold/25 bg-gold/5">
+                  {icon}
+                </div>
+                <h3 className="font-body text-base font-semibold text-cream mb-2">{title}</h3>
+                <p className="font-body text-sm text-cream-muted leading-relaxed">{desc}</p>
               </div>
-              <h3 className="font-body text-base font-semibold text-cream mb-2">{title}</h3>
-              <p className="font-body text-sm text-cream-muted leading-relaxed">{desc}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* HOW IT WORKS */}
       <section id="how-it-works" className="px-6 py-24 max-w-5xl mx-auto scroll-mt-20">
-        <div className="text-center mb-16">
+        <Reveal className="text-center mb-16">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Process</p>
           <h2 className="font-display text-4xl md:text-5xl font-light text-cream">Three steps to a better first impression</h2>
-        </div>
+        </Reveal>
         <div className="grid md:grid-cols-3 gap-8">
-          {STEPS.map(({ number, title, desc }) => (
-            <div key={number} className="relative p-8 rounded-2xl border border-border bg-charcoal/50 hover:border-gold/40 transition-colors duration-300">
-              <div className="font-display text-6xl font-semibold text-gold/20 mb-4 leading-none">{number}</div>
-              <h3 className="font-display text-2xl font-medium text-cream mb-3">{title}</h3>
-              <p className="font-body text-sm text-cream-muted leading-relaxed">{desc}</p>
-            </div>
+          {STEPS.map(({ number, title, desc }, i) => (
+            <Reveal key={number} delay={i * 100}>
+              <div className="lift relative h-full p-8 rounded-2xl border border-border bg-charcoal/50 hover:border-gold/40">
+                <div className="font-display text-6xl font-semibold text-gold/20 mb-4 leading-none">{number}</div>
+                <h3 className="font-display text-2xl font-medium text-cream mb-3">{title}</h3>
+                <p className="font-body text-sm text-cream-muted leading-relaxed">{desc}</p>
+              </div>
+            </Reveal>
           ))}
+        </div>
+      </section>
+
+      {/* COMPARISON — factual vs a traditional studio */}
+      <section className="px-6 py-24 max-w-5xl mx-auto">
+        <Reveal className="text-center mb-14">
+          <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">The Math</p>
+          <h2 className="font-display text-4xl md:text-5xl font-light text-cream">A fraction of the cost. None of the hassle.</h2>
+        </Reveal>
+        <div className="grid md:grid-cols-2 gap-5">
+          <Reveal>
+            <div className="h-full p-8 rounded-2xl border border-border bg-charcoal/30">
+              <p className="font-body text-xs tracking-widest uppercase text-cream-muted mb-5">Traditional studio</p>
+              <ul className="space-y-3">
+                {COMPARE.studio.map((item) => (
+                  <li key={item} className="flex items-start gap-3 font-body text-sm text-cream-muted">
+                    <svg className="w-4 h-4 mt-0.5 shrink-0 text-cream-muted/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
+          <Reveal delay={100}>
+            <div className="h-full p-8 rounded-2xl border border-gold/40 bg-gold/[0.04] gold-glow">
+              <p className="font-body text-xs tracking-widest uppercase text-gold mb-5">SnapShot AI</p>
+              <ul className="space-y-3">
+                {COMPARE.snapshot.map((item) => (
+                  <li key={item} className="flex items-start gap-3 font-body text-sm text-cream">
+                    <svg className="w-4 h-4 mt-0.5 shrink-0 text-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* STYLES */}
       <section className="px-6 py-24 max-w-6xl mx-auto">
-        <div className="text-center mb-14">
+        <Reveal className="text-center mb-14">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Styles</p>
           <h2 className="font-display text-4xl md:text-5xl font-light text-cream">Every style. Every industry.</h2>
           <p className="font-body text-sm text-cream-muted mt-4 max-w-xl mx-auto">
             Standard and Premium packages include multiple background styles so your set works everywhere you need it.
           </p>
-        </div>
+        </Reveal>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {STYLES.map(({ name, desc }) => (
-            <div key={name} className="p-6 rounded-2xl border border-border bg-charcoal/40 hover:border-gold/40 transition-colors duration-300">
-              <p className="font-display text-xl text-cream mb-1">{name}</p>
-              <p className="font-body text-xs text-cream-muted leading-relaxed">{desc}</p>
-            </div>
+          {STYLES.map(({ name, desc }, i) => (
+            <Reveal key={name} delay={i * 60}>
+              <div className="lift h-full p-6 rounded-2xl border border-border bg-charcoal/40 hover:border-gold/40">
+                <p className="font-display text-xl text-cream mb-1">{name}</p>
+                <p className="font-body text-xs text-cream-muted leading-relaxed">{desc}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -231,68 +328,77 @@ export default function LandingPage() {
       {/* PRICING */}
       <section id="pricing" className="px-6 py-24 scroll-mt-20">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
+          <Reveal className="text-center mb-12">
             <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Pricing</p>
             <h2 className="font-display text-4xl md:text-5xl font-light text-cream">Simple. One-time. Fair.</h2>
             <p className="font-body text-sm text-cream-muted mt-3">Preview is always free. Pay only when you like what you see.</p>
-          </div>
+          </Reveal>
 
           <div className="grid md:grid-cols-3 gap-6">
 
-            <div className="rounded-2xl border border-border bg-charcoal/50 p-8 flex flex-col hover:border-gold/40 transition-colors duration-300">
-              <p className="font-body text-xs tracking-widest uppercase text-cream-muted mb-2">Basic</p>
-              <div className="font-display text-5xl font-semibold text-cream mb-1">$9.99</div>
-              <p className="font-body text-xs text-cream-muted mb-6">one-time · no subscription</p>
-              <ul className="space-y-2 mb-8 flex-1">
-                {['1 professional headshot', 'Studio lighting', 'High-resolution download', 'Commercial use license'].map((item) => (
-                  <li key={item} className="flex items-center gap-2 font-body text-sm text-cream-muted">
-                    <span className="text-gold">✓</span><span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/upload" className="block w-full py-3 rounded-full font-body font-medium text-center border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300">
-                Start Free Preview
-              </Link>
-            </div>
-
-            <div className="relative rounded-2xl p-1" style={{ background: 'linear-gradient(135deg, #C9A550, #8B6914, #C9A550)' }}>
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[11px] font-body font-semibold tracking-wider uppercase text-obsidian"
-                style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}>
-                Most Popular
-              </div>
-              <div className="rounded-[14px] bg-charcoal p-8 flex flex-col h-full">
-                <p className="font-body text-xs tracking-widest uppercase text-gold mb-2">Standard</p>
-                <div className="font-display text-5xl font-semibold text-cream mb-1">$19.99</div>
+            <Reveal>
+              <div className="lift rounded-2xl border border-border bg-charcoal/50 p-8 flex flex-col h-full hover:border-gold/40">
+                <p className="font-body text-xs tracking-widest uppercase text-cream-muted mb-2">Basic</p>
+                <div className="font-display text-5xl font-semibold text-cream mb-1">$9.99</div>
                 <p className="font-body text-xs text-cream-muted mb-6">one-time · no subscription</p>
                 <ul className="space-y-2 mb-8 flex-1">
-                  {['15 professional headshots', '3 background styles', 'High-resolution downloads', 'Commercial use license', 'Delivered in 30 min'].map((item) => (
+                  {['1 professional headshot', 'Studio lighting', 'High-resolution download', 'Commercial use license'].map((item) => (
                     <li key={item} className="flex items-center gap-2 font-body text-sm text-cream-muted">
                       <span className="text-gold">✓</span><span>{item}</span>
                     </li>
                   ))}
                 </ul>
-                <Link href="/upload" className="block w-full py-3 rounded-full font-body font-medium text-obsidian text-center transition-all duration-300 hover:scale-[1.02]"
-                  style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}>
+                <Link href="/upload" className="block w-full py-3 rounded-full font-body font-medium text-center border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300">
                   Start Free Preview
                 </Link>
               </div>
-            </div>
+            </Reveal>
 
-            <div className="rounded-2xl border border-border bg-charcoal/50 p-8 flex flex-col hover:border-gold/40 transition-colors duration-300">
-              <p className="font-body text-xs tracking-widest uppercase text-cream-muted mb-2">Premium</p>
-              <div className="font-display text-5xl font-semibold text-cream mb-1">$24.99</div>
-              <p className="font-body text-xs text-cream-muted mb-6">one-time · no subscription</p>
-              <ul className="space-y-2 mb-8 flex-1">
-                {['30 professional headshots', '5 background styles', 'High-resolution downloads', 'Commercial use license', 'Delivered in 30 min', 'Best value per photo'].map((item) => (
-                  <li key={item} className="flex items-center gap-2 font-body text-sm text-cream-muted">
-                    <span className="text-gold">✓</span><span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/upload" className="block w-full py-3 rounded-full font-body font-medium text-center border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300">
-                Start Free Preview
-              </Link>
-            </div>
+            <Reveal delay={100}>
+              <div className="relative rounded-2xl p-1 h-full" style={{ background: 'linear-gradient(135deg, #C9A550, #8B6914, #C9A550)' }}>
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[11px] font-body font-semibold tracking-wider uppercase text-obsidian z-10"
+                  style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}>
+                  Most Popular
+                </div>
+                <div className="rounded-[14px] bg-charcoal p-8 flex flex-col h-full">
+                  <p className="font-body text-xs tracking-widest uppercase text-gold mb-2">Standard</p>
+                  <div className="font-display text-5xl font-semibold text-cream mb-1">$19.99</div>
+                  <p className="font-body text-xs text-cream-muted mb-6">≈ $1.33 per photo · no subscription</p>
+                  <ul className="space-y-2 mb-8 flex-1">
+                    {['15 professional headshots', '3 background styles', 'High-resolution downloads', 'Commercial use license', 'Delivered in 30 min'].map((item) => (
+                      <li key={item} className="flex items-center gap-2 font-body text-sm text-cream-muted">
+                        <span className="text-gold">✓</span><span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/upload" className="block w-full py-3 rounded-full font-body font-medium text-obsidian text-center transition-all duration-300 hover:scale-[1.02]"
+                    style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}>
+                    Start Free Preview
+                  </Link>
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal delay={200}>
+              <div className="lift rounded-2xl border border-border bg-charcoal/50 p-8 flex flex-col h-full hover:border-gold/40">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-body text-xs tracking-widest uppercase text-cream-muted">Premium</p>
+                  <span className="px-2 py-0.5 rounded-full border border-gold/40 text-gold font-body text-[10px] tracking-wider uppercase">Best value</span>
+                </div>
+                <div className="font-display text-5xl font-semibold text-cream mb-1">$24.99</div>
+                <p className="font-body text-xs text-cream-muted mb-6">≈ $0.83 per photo · no subscription</p>
+                <ul className="space-y-2 mb-8 flex-1">
+                  {['30 professional headshots', '5 background styles', 'High-resolution downloads', 'Commercial use license', 'Delivered in 30 min', 'Best value per photo'].map((item) => (
+                    <li key={item} className="flex items-center gap-2 font-body text-sm text-cream-muted">
+                      <span className="text-gold">✓</span><span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/upload" className="block w-full py-3 rounded-full font-body font-medium text-center border border-gold text-gold hover:bg-gold hover:text-obsidian transition-all duration-300">
+                  Start Free Preview
+                </Link>
+              </div>
+            </Reveal>
 
           </div>
           <p className="font-body text-xs text-cream-muted text-center mt-6">
@@ -301,62 +407,60 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* GUARANTEE — risk reversal */}
+      <section className="px-6 py-20">
+        <Reveal className="max-w-4xl mx-auto">
+          <div className="relative rounded-3xl border border-gold/30 bg-charcoal/40 p-10 md:p-14 text-center overflow-hidden">
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: 'radial-gradient(ellipse 50% 60% at 50% 0%, rgba(201,165,80,0.10) 0%, transparent 70%)' }} />
+            <div className="relative">
+              <div className="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center text-gold mb-6 border border-gold/30 bg-gold/5">
+                <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" />
+                </svg>
+              </div>
+              <h2 className="font-display text-3xl md:text-4xl font-light text-cream mb-4">Our whole model is the guarantee</h2>
+              <p className="font-body text-base text-cream-muted max-w-2xl mx-auto leading-relaxed">
+                You never pay to find out if it worked. We generate a real preview from your own photo, watermarked, for free — and you decide from there. No surprises, no risk, no reason to hesitate.
+              </p>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
       {/* FAQ */}
       <section id="faq" className="px-6 py-24 max-w-3xl mx-auto scroll-mt-20">
-        <div className="text-center mb-12">
+        <Reveal className="text-center mb-12">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">FAQ</p>
           <h2 className="font-display text-4xl font-light text-cream">Questions answered</h2>
-        </div>
-        <div className="space-y-4">
-          {FAQS.map(({ q, a }) => (
-            <div key={q} className="p-6 rounded-2xl border border-border bg-charcoal/40 hover:border-gold/30 transition-colors duration-300">
-              <h3 className="font-display text-xl font-medium text-cream mb-2">{q}</h3>
-              <p className="font-body text-sm text-cream-muted leading-relaxed">{a}</p>
-            </div>
-          ))}
-        </div>
+        </Reveal>
+        <Reveal>
+          <FAQ items={FAQS} />
+        </Reveal>
       </section>
 
       {/* FINAL CTA */}
       <section className="px-6 py-24 text-center relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: 'radial-gradient(ellipse 50% 60% at 50% 50%, rgba(201,165,80,0.06) 0%, transparent 70%)' }} />
-        <h2 className="font-display text-4xl md:text-6xl font-light text-cream mb-4 relative">
-          See your headshots<br />
-          <em className="text-gold not-italic">before you decide.</em>
-        </h2>
-        <p className="font-body text-sm text-cream-muted mb-8">Free preview · From $9.99 · Delivered in 30 minutes</p>
-        <Link
-          href="/upload"
-          className="gold-glow inline-flex items-center gap-3 px-10 py-5 rounded-full font-body font-medium text-obsidian text-lg transition-all duration-300 hover:scale-105"
-          style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
-        >
-          Start My Free Preview
-        </Link>
+        <Reveal>
+          <h2 className="font-display text-4xl md:text-6xl font-light text-cream mb-4 relative">
+            See your headshots<br />
+            <em className="text-gold not-italic">before you decide.</em>
+          </h2>
+          <p className="font-body text-sm text-cream-muted mb-8">Free preview · From $9.99 · Delivered in 30 minutes</p>
+          <Link
+            href="/upload"
+            className="gold-glow inline-flex items-center gap-3 px-10 py-5 rounded-full font-body font-medium text-obsidian text-lg transition-all duration-300 hover:scale-105"
+            style={{ background: 'linear-gradient(135deg, #E2C06A, #C9A550)' }}
+          >
+            Start My Free Preview
+          </Link>
+        </Reveal>
       </section>
 
-      {/* FOOTER */}
-      <footer className="px-6 py-10 border-t border-border">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
-            <span className="font-display text-xl text-cream">
-              Snap<span className="text-gold">Shot</span> AI
-            </span>
-            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
-              <a href="#how-it-works" className="font-body text-xs text-cream-muted hover:text-cream transition-colors">How it works</a>
-              <a href="#pricing" className="font-body text-xs text-cream-muted hover:text-cream transition-colors">Pricing</a>
-              <a href="#faq" className="font-body text-xs text-cream-muted hover:text-cream transition-colors">FAQ</a>
-              <Link href="/privacy" className="font-body text-xs text-cream-muted hover:text-cream transition-colors">Privacy</Link>
-              <Link href="/terms" className="font-body text-xs text-cream-muted hover:text-cream transition-colors">Terms</Link>
-              <a href="mailto:hello@pinelightlabs.com" className="font-body text-xs text-cream-muted hover:text-cream transition-colors">Contact</a>
-            </div>
-          </div>
-          <p className="font-body text-xs text-cream-muted/60 text-center md:text-left">
-            © {new Date().getFullYear()} SnapShot AI. Headshots are AI-generated from photos you provide. Uploads are deleted within 24 hours.
-          </p>
-        </div>
-      </footer>
-
+      <SiteFooter />
+      <StickyBuyBar />
     </main>
   )
 }
