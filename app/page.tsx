@@ -6,6 +6,7 @@ import SiteNav from '../components/SiteNav'
 import SiteFooter from '../components/SiteFooter'
 import StickyBuyBar from '../components/StickyBuyBar'
 import FAQ from '../components/FAQ'
+import Showcase from '../components/Showcase'
 
 const TRUST_POINTS = [
   {
@@ -119,16 +120,6 @@ const FAQS = [
   },
 ]
 
-/** Neutral portrait glyph — an illustrative stand-in, never a real customer photo. */
-function PortraitGlyph({ tone = '#0d0d0d' }: { tone?: string }) {
-  return (
-    <svg viewBox="0 0 100 120" className="w-full h-full" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-      <circle cx="50" cy="42" r="20" fill={tone} opacity="0.55" />
-      <path d="M18 118c0-19 15-32 32-32s32 13 32 32z" fill={tone} opacity="0.55" />
-    </svg>
-  )
-}
-
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-obsidian text-cream overflow-x-hidden">
@@ -139,7 +130,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 25%, rgba(201,165,80,0.08) 0%, transparent 70%)' }} />
 
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 items-center relative">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.15fr_0.85fr] gap-14 lg:gap-10 items-center lg:items-start relative">
           {/* Copy */}
           <div className="text-center lg:text-left">
             <div className="animate-fade-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 mb-8">
@@ -182,35 +173,15 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Illustrative process visual — abstract silhouettes, not real people */}
-          <div className="animate-fade-up delay-300 relative hidden lg:block">
-            <div className="relative mx-auto max-w-md">
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { label: 'Your photo', tag: 'Before', bg: 'linear-gradient(145deg, #262019, #171310)', tone: '#8a7a5c', dim: true },
-                  { label: 'Corporate', tag: 'After', bg: 'linear-gradient(145deg, #ededed, #cccccc)', tone: '#3a3a3a', dim: false },
-                  { label: 'Executive', tag: 'After', bg: 'linear-gradient(145deg, #0d0d0d, #242424)', tone: '#b9a06a', dim: false },
-                  { label: 'Outdoor', tag: 'After', bg: 'linear-gradient(145deg, #2a3524, #48583a)', tone: '#dfe4d3', dim: false },
-                ].map((card, i) => (
-                  <div
-                    key={card.label}
-                    className={`relative rounded-2xl overflow-hidden border border-border ${i % 2 === 1 ? 'translate-y-6' : ''}`}
-                    style={{ background: card.bg, aspectRatio: '3 / 4' }}
-                  >
-                    <div className="absolute inset-0 p-6 opacity-90">
-                      <PortraitGlyph tone={card.tone} />
-                    </div>
-                    <span
-                      className={`absolute top-3 left-3 px-2 py-0.5 rounded-full text-[9px] font-body font-semibold tracking-wider uppercase ${card.dim ? 'bg-obsidian/70 text-cream-muted' : 'bg-grad-gold text-obsidian'}`}
-                    >
-                      {card.tag}
-                    </span>
-                    <span className="absolute bottom-3 left-3 font-body text-[11px] tracking-wide text-cream/90">{card.label}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="font-body text-[11px] text-cream-muted/60 text-center mt-8">Illustration of the transformation — your results are generated from your own photo.</p>
-            </div>
+          {/* Before/after showcase — real transformation example, offset to overlap the copy column at lg+ */}
+          <div className="animate-fade-up delay-300 relative hidden lg:block lg:mt-16 lg:-ml-6 z-10">
+            <Showcase
+              beforeSrc="/showcase/before-1.jpg"
+              afterSrc="/showcase/after-1.jpg"
+              afterLabel="Executive"
+              priority
+              className="max-w-sm mx-auto"
+            />
           </div>
         </div>
       </section>
@@ -220,7 +191,7 @@ export default function LandingPage() {
       </div>
 
       {/* WHY TRUST US */}
-      <section className="px-6 py-24 max-w-6xl mx-auto">
+      <section className="px-6 section-py-lg max-w-6xl mx-auto">
         <Reveal className="text-center mb-14">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Built on Trust</p>
           <h2 className="font-display text-4xl md:text-5xl font-light text-cream">You see the quality before you spend a cent</h2>
@@ -244,9 +215,12 @@ export default function LandingPage() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" className="px-6 py-24 max-w-5xl mx-auto scroll-mt-20">
-        <Reveal className="text-center mb-16">
-          <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Process</p>
+      <section id="how-it-works" className="px-6 section-py-xl max-w-5xl mx-auto scroll-mt-20">
+        <Reveal className="mb-16 max-w-2xl">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="h-px w-8 bg-gold" />
+            <p className="font-body text-xs tracking-widest uppercase text-gold">Process</p>
+          </div>
           <h2 className="font-display text-4xl md:text-5xl font-light text-cream">Three steps to a better first impression</h2>
         </Reveal>
         <div className="grid md:grid-cols-3 gap-8">
@@ -263,14 +237,14 @@ export default function LandingPage() {
       </section>
 
       {/* COMPARISON — factual vs a traditional studio */}
-      <section className="px-6 py-24 max-w-5xl mx-auto">
+      <section className="px-6 section-py-md max-w-5xl mx-auto">
         <Reveal className="text-center mb-14">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">The Math</p>
           <h2 className="font-display text-4xl md:text-5xl font-light text-cream">A fraction of the cost. None of the hassle.</h2>
         </Reveal>
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:grid-cols-2 gap-5 items-center">
           <Reveal>
-            <div className="h-full p-8 rounded-2xl border border-border bg-charcoal/30">
+            <div className="h-full p-8 rounded-2xl border border-border bg-charcoal/20 lg:mt-6 lg:scale-[0.97] opacity-80">
               <p className="font-body text-xs tracking-widest uppercase text-cream-muted mb-5">Traditional studio</p>
               <ul className="space-y-3">
                 {COMPARE.studio.map((item) => (
@@ -285,7 +259,7 @@ export default function LandingPage() {
             </div>
           </Reveal>
           <Reveal delay={100}>
-            <div className="h-full p-8 rounded-2xl border border-gold/40 bg-gold/[0.04] gold-glow">
+            <div className="relative z-10 h-full p-8 rounded-2xl border border-gold/40 bg-gold/[0.04] shadow-[var(--shadow-3)]" style={{ boxShadow: 'var(--shadow-3), var(--glow-gold)' }}>
               <p className="font-body text-xs tracking-widest uppercase text-gold mb-5">SnapShot AI</p>
               <ul className="space-y-3">
                 {COMPARE.snapshot.map((item) => (
@@ -303,11 +277,14 @@ export default function LandingPage() {
       </section>
 
       {/* STYLES */}
-      <section className="px-6 py-24 max-w-6xl mx-auto">
-        <Reveal className="text-center mb-14">
-          <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Styles</p>
+      <section className="px-6 section-py-lg max-w-6xl mx-auto">
+        <Reveal className="mb-14 max-w-xl">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="h-px w-8 bg-gold" />
+            <p className="font-body text-xs tracking-widest uppercase text-gold">Styles</p>
+          </div>
           <h2 className="font-display text-4xl md:text-5xl font-light text-cream">Every style. Every industry.</h2>
-          <p className="font-body text-sm text-cream-muted mt-4 max-w-xl mx-auto">
+          <p className="font-body text-sm text-cream-muted mt-4">
             Standard and Premium packages include multiple background styles so your set works everywhere you need it.
           </p>
         </Reveal>
@@ -324,7 +301,7 @@ export default function LandingPage() {
       </section>
 
       {/* PRICING */}
-      <section id="pricing" className="px-6 py-24 scroll-mt-20">
+      <section id="pricing" className="px-6 section-py-xl scroll-mt-20">
         <div className="max-w-5xl mx-auto">
           <Reveal className="text-center mb-12">
             <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">Pricing</p>
@@ -332,10 +309,10 @@ export default function LandingPage() {
             <p className="font-body text-sm text-cream-muted mt-3">Preview is always free. Pay only when you like what you see.</p>
           </Reveal>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-6 md:items-center">
 
             <Reveal>
-              <div className="lift rounded-2xl border border-border bg-charcoal/50 p-8 flex flex-col h-full hover:border-gold/40">
+              <div className="lift rounded-2xl border border-border bg-charcoal/50 p-8 flex flex-col h-full hover:border-gold/40 lg:mt-6">
                 <p className="font-body text-xs tracking-widest uppercase text-cream-muted mb-2">Basic</p>
                 <div className="font-display text-5xl font-semibold text-cream mb-1">$9.99</div>
                 <p className="font-body text-xs text-cream-muted mb-6">one-time · no subscription</p>
@@ -353,7 +330,7 @@ export default function LandingPage() {
             </Reveal>
 
             <Reveal delay={100}>
-              <div className="relative rounded-2xl p-1 h-full" style={{ background: 'linear-gradient(135deg, #C9A550, #8B6914, #C9A550)' }}>
+              <div className="relative z-10 rounded-2xl p-1 h-full lg:scale-105 lg:-translate-y-4 shadow-[var(--shadow-3)]" style={{ background: 'linear-gradient(135deg, #C9A550, #8B6914, #C9A550)' }}>
                 <div className="bg-grad-gold absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[11px] font-body font-semibold tracking-wider uppercase text-obsidian z-10">
                   Most Popular
                 </div>
@@ -376,7 +353,7 @@ export default function LandingPage() {
             </Reveal>
 
             <Reveal delay={200}>
-              <div className="lift rounded-2xl border border-border bg-charcoal/50 p-8 flex flex-col h-full hover:border-gold/40">
+              <div className="lift rounded-2xl border border-border bg-charcoal/50 p-8 flex flex-col h-full hover:border-gold/40 lg:mt-6">
                 <div className="flex items-center justify-between mb-2">
                   <p className="font-body text-xs tracking-widest uppercase text-cream-muted">Premium</p>
                   <span className="px-2 py-0.5 rounded-full border border-gold/40 text-gold font-body text-[10px] tracking-wider uppercase">Best value</span>
@@ -404,7 +381,7 @@ export default function LandingPage() {
       </section>
 
       {/* GUARANTEE — risk reversal */}
-      <section className="px-6 py-20">
+      <section className="px-6 section-py-md">
         <Reveal className="max-w-4xl mx-auto">
           <div className="relative rounded-3xl border border-gold/30 bg-charcoal/40 p-10 md:p-14 text-center overflow-hidden">
             <div className="absolute inset-0 pointer-events-none"
@@ -425,7 +402,7 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="px-6 py-24 max-w-3xl mx-auto scroll-mt-20">
+      <section id="faq" className="px-6 section-py-lg max-w-3xl mx-auto scroll-mt-20">
         <Reveal className="text-center mb-12">
           <p className="font-body text-xs tracking-widest uppercase text-gold mb-3">FAQ</p>
           <h2 className="font-display text-4xl font-light text-cream">Questions answered</h2>
@@ -436,7 +413,7 @@ export default function LandingPage() {
       </section>
 
       {/* FINAL CTA */}
-      <section className="px-6 py-24 text-center relative overflow-hidden">
+      <section className="px-6 section-py-xl text-center relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: 'radial-gradient(ellipse 50% 60% at 50% 50%, rgba(201,165,80,0.06) 0%, transparent 70%)' }} />
         <Reveal>

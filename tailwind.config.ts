@@ -22,8 +22,8 @@ const config: Config = {
         body: ['var(--font-body)', 'sans-serif'],
       },
       animation: {
-        'fade-up': 'fadeUp 0.7s ease forwards',
-        'fade-in': 'fadeIn 1s ease forwards',
+        'fade-up': 'fadeUp 0.7s var(--ease-out) forwards',
+        'fade-in': 'fadeIn 1s var(--ease-out) forwards',
         shimmer: 'shimmer 2s infinite',
       },
       keyframes: {
