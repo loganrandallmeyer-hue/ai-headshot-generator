@@ -325,7 +325,7 @@ export default function LandingPage() {
                 <div className="relative aspect-[832/1216] overflow-hidden rounded-xl border border-gold/25 shadow-[var(--shadow-2)]">
                   <Image
                     src={`/styles/${card.id}.jpg`}
-                    alt={`${card.label} style example`}
+                    alt={`Polished AI-generated headshot — ${card.label} style`}
                     width={832}
                     height={1216}
                     sizes="150px"
@@ -336,7 +336,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <p className="font-body text-[11px] text-cream-muted/80 text-center mt-4">Illustrative examples — your results are generated from your own photo.</p>
+          <p className="font-body text-[11px] text-cream-muted/80 text-center mt-4">Real examples, generated from a real uploaded photo.</p>
         </Reveal>
       </section>
 

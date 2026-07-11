@@ -19,7 +19,7 @@ export function newReplicate(): Replicate {
 }
 
 const IDENTITY_GUARD =
-  "Keep this exact person's identity completely unchanged: same face, same facial structure, same gender, same jawline, same nose, same eyes, same lips, same skin tone and natural skin texture, same hairstyle. Do NOT add makeup, lip gloss, or lipstick. Do NOT smooth or retouch the skin. Do NOT feminize, masculinize, beautify, or slim the face. The person must be instantly recognizable as the same person from the original photo."
+  "Keep this exact person's identity completely unchanged: same face, same facial structure, same gender, same jawline, same nose, same eyes, same lips, same skin tone and natural skin texture, same hairstyle. Do NOT add makeup, lip gloss, or lipstick. Do NOT smooth or retouch the skin. Do NOT feminize, masculinize, beautify, or slim the face. The person must be instantly recognizable as the same person from the original photo. DO NOT ADD ANY WRINKLES THAT AREN'T THERE, AND DON'T TAKE AWAY ANY EITHER."
 
 /**
  * Single source of truth for every selectable headshot style: the frontend
@@ -44,7 +44,7 @@ export const HEADSHOT_STYLES = {
     label: 'Executive',
     description: 'Commanding presence, dark tones',
     preview: '/styles/executive.jpg',
-    prompt: `Change the outfit to a tailored formal suit and the background to a dark gradient studio backdrop. Apply dramatic rim lighting and give the subject a commanding, confident posture with a composed, authoritative expression. Sharp focus, premium luxury aesthetic, like a CEO or leadership portrait. ${IDENTITY_GUARD}`,
+    prompt: `Change the outfit to a tailored formal suit and the background to a dark gradient studio backdrop. Apply dramatic rim lighting and give the subject a commanding, confident posture with a composed, authoritative expression. Sharp focus, premium luxury aesthetic, like a CEO or leadership portrait. Make sure there is some contrast in color between the suit and the background — make the ENTIRE suit slightly lighter. ${IDENTITY_GUARD}`,
   },
   creative: {
     label: 'Creative',
