@@ -312,32 +312,6 @@ export default function LandingPage() {
             </Reveal>
           ))}
         </div>
-
-        {/* Styles proof strip — layered trio of real examples */}
-        <Reveal className="mt-14">
-          <div className="flex justify-center items-end -space-x-6 sm:-space-x-10">
-            {[
-              { id: 'corporate', label: 'Corporate', rotate: '-rotate-3', z: 'z-10' },
-              { id: 'creative', label: 'Creative', rotate: 'rotate-0', z: 'z-20 scale-110' },
-              { id: 'startup', label: 'Startup', rotate: 'rotate-3', z: 'z-10' },
-            ].map((card) => (
-              <div key={card.label} className={`relative ${card.rotate} ${card.z} w-28 sm:w-36 shrink-0`}>
-                <div className="relative aspect-[832/1216] overflow-hidden rounded-xl border border-gold/25 shadow-[var(--shadow-2)]">
-                  <Image
-                    src={`/styles/${card.id}.jpg`}
-                    alt={`Polished AI-generated headshot — ${card.label} style`}
-                    width={832}
-                    height={1216}
-                    sizes="150px"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <span className="mt-2 block text-center font-body text-[11px] tracking-wide text-cream-muted">{card.label}</span>
-              </div>
-            ))}
-          </div>
-          <p className="font-body text-[11px] text-cream-muted/80 text-center mt-4">Real examples, generated from a real uploaded photo.</p>
-        </Reveal>
       </section>
 
       {/* PRICING */}
