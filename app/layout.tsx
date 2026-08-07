@@ -19,6 +19,9 @@ const body = DM_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://snapshotai.pinelightlabs.com'),
+  alternates: {
+    canonical: '/',
+  },
   title: 'SnapShot AI — Professional AI Headshots with a Free Preview',
   description:
     'Upload one photo and preview your AI-generated professional headshots free. Packages from $9.99, delivered in 30 minutes. One-time payment, photos deleted in 24 hours.',
