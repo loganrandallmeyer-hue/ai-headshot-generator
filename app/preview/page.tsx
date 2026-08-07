@@ -46,6 +46,18 @@ function PreviewContent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [previewReady, setPreviewReady] = useState(false)
+  const [sourcePhoto, setSourcePhoto] = useState<string | null>(null)
+
+  // The original upload (stashed in sessionStorage at /upload) powers the
+  // before/after comparison — the single most persuasive element on this page.
+  useEffect(() => {
+    try {
+      const s = sessionStorage.getItem('sa_source_photo')
+      if (s && s.startsWith('data:image/')) setSourcePhoto(s)
+    } catch {
+      /* sessionStorage unavailable — fall back to single sample */
+    }
+  }, [])
 
   // Session data passed via URL params + sessionStorage
   const sessionId = searchParams.get('session_id') ?? ''
@@ -54,6 +66,7 @@ function PreviewContent() {
   const previewUrl = searchParams.get('preview_url') ? decodeURIComponent(searchParams.get('preview_url')!) : ''
   const styleParam = searchParams.get('style')
   const style = isValidStyle(styleParam) ? styleParam : DEFAULT_STYLE
+  const marketingConsent = searchParams.get('consent') === '1'
 
   // Draw watermarked preview on canvas
   useEffect(() => {
@@ -121,7 +134,7 @@ function PreviewContent() {
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, predictionId, sessionId, tier: selectedTier, style }),
+        body: JSON.stringify({ email, predictionId, sessionId, tier: selectedTier, style, marketingConsent }),
       })
 
       if (res.status === 409) {
@@ -171,29 +184,64 @@ function PreviewContent() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
-          {/* Watermarked Preview */}
+          {/* Before/After Preview */}
           <div>
-            <p className="font-body text-xs uppercase tracking-widest text-cream-muted mb-3">Sample Preview</p>
-            <div className="surface-hero relative rounded-2xl overflow-hidden">
-              <span className="absolute left-3 top-3 z-10 rounded-full bg-obsidian/80 px-3 py-1 text-[10px] uppercase tracking-wide text-gold border border-gold/30">
-                Your result
-              </span>
-              {previewUrl && (
-                <canvas
-                  ref={canvasRef}
-                  className="w-full h-auto block"
-                  style={{ display: previewReady ? 'block' : 'none' }}
-                />
-              )}
-              {!previewReady && (
-                <div className="aspect-square flex items-center justify-center">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
-                    <p className="font-body text-xs text-cream-muted">Loading preview...</p>
-                  </div>
+            <p className="font-body text-xs uppercase tracking-widest text-cream-muted mb-3">
+              {sourcePhoto ? 'Your photo → Your result' : 'Sample Preview'}
+            </p>
+
+            {sourcePhoto ? (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="surface-base relative rounded-2xl overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={sourcePhoto} alt="Your original photo" className="w-full h-auto block" />
+                  <span className="absolute left-2 top-2 z-10 rounded-full bg-obsidian/80 px-2 py-0.5 text-[10px] uppercase tracking-wide text-cream-muted border border-border">
+                    Before
+                  </span>
                 </div>
-              )}
-            </div>
+                <div className="surface-hero relative rounded-2xl overflow-hidden">
+                  <span className="absolute left-2 top-2 z-10 rounded-full bg-obsidian/80 px-2 py-0.5 text-[10px] uppercase tracking-wide text-gold border border-gold/30">
+                    After · AI
+                  </span>
+                  {previewUrl && (
+                    <canvas
+                      ref={canvasRef}
+                      className="w-full h-auto block"
+                      style={{ display: previewReady ? 'block' : 'none' }}
+                    />
+                  )}
+                  {!previewReady && (
+                    <div className="aspect-square flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+                        <p className="font-body text-xs text-cream-muted">Loading preview...</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="surface-hero relative rounded-2xl overflow-hidden">
+                <span className="absolute left-3 top-3 z-10 rounded-full bg-obsidian/80 px-3 py-1 text-[10px] uppercase tracking-wide text-gold border border-gold/30">
+                  Your result
+                </span>
+                {previewUrl && (
+                  <canvas
+                    ref={canvasRef}
+                    className="w-full h-auto block"
+                    style={{ display: previewReady ? 'block' : 'none' }}
+                  />
+                )}
+                {!previewReady && (
+                  <div className="aspect-square flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+                      <p className="font-body text-xs text-cream-muted">Loading preview...</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             <p className="font-body text-xs text-cream-muted text-center mt-3">
               Watermark removed after purchase
             </p>
@@ -287,6 +335,9 @@ function PreviewContent() {
             </div>
             <p className="font-body text-xs text-cream-muted text-center mt-3">
               Headshots delivered to <strong className="text-cream">{email}</strong>
+            </p>
+            <p className="font-body text-[11px] text-cream-muted text-center mt-2">
+              48-hour money-back guarantee · Use code <span className="text-gold font-medium">LAUNCH20</span> for 20% off
             </p>
           </div>
         </div>

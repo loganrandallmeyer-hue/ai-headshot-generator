@@ -106,3 +106,57 @@ export async function sendHeadshotsEmail(
     }
   }
 }
+
+/**
+ * Recovery email for shoppers who started checkout but didn't finish
+ * (Stripe `checkout.session.expired`). Their preview photos are only held
+ * 24h, so speed matters — this nudges them back to a fresh preview with a
+ * launch discount. Sent automatically by the webhook, no consent needed
+ * (transactional recovery of an abandoned purchase).
+ */
+export async function sendRecoveryEmail(toEmail: string): Promise<void> {
+  const resend = new Resend(process.env.RESEND_API_KEY!)
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8" /></head>
+    <body style="background:#090909; color:#F0EBE0; font-family:sans-serif; padding:40px 20px; max-width:600px; margin:0 auto;">
+      <div style="text-align:center; margin-bottom:32px;">
+        <h1 style="font-size:28px; font-weight:300; color:#F0EBE0; margin:0 0 8px;">
+          Your free preview is waiting
+        </h1>
+        <p style="color:#A89F92; font-size:15px; margin:0;">
+          Looks like your order didn't go through — no problem. Your photos are only held for 24 hours, then deleted for your privacy.
+        </p>
+      </div>
+      <div style="text-align:center; margin-bottom:32px;">
+        <a href="https://snapshotai.pinelightlabs.com/upload?utm_source=recovery&utm_medium=email"
+           style="display:inline-block; background:linear-gradient(135deg,#E2C06A,#C9A550); color:#090909; text-decoration:none; font-weight:600; padding:14px 32px; border-radius:999px; font-size:15px;">
+          Start a fresh free preview
+        </a>
+      </div>
+      <div style="background:#141414; border:1px solid #2A2A2A; border-radius:16px; padding:24px; margin-bottom:32px;">
+        <p style="color:#A89F92; font-size:14px; line-height:1.8; margin:0;">
+          Use code <strong style="color:#F0EBE0;">LAUNCH20</strong> at checkout for 20% off your package.
+          Your preview is free either way — pay only if you love the result.
+        </p>
+      </div>
+      <p style="color:#A89F92; font-size:12px; text-align:center;">
+        Questions? Reply to this email or contact us at hello@pinelightlabs.com<br />
+        © ${new Date().getFullYear()} SnapShot AI
+      </p>
+    </body>
+    </html>
+  `
+
+  const { error } = await resend.emails.send({
+    from: 'SnapShot AI <hello@pinelightlabs.com>',
+    to: toEmail,
+    subject: 'Your free preview is still waiting',
+    html,
+  })
+  if (error) {
+    throw new Error(`Recovery email failed: ${error.message}`)
+  }
+}

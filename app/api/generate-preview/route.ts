@@ -10,6 +10,34 @@ const MAX_DATA_URL_CHARS = 1_500_000 // ~1MB image after base64 overhead
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 /**
+ * Cheap per-IP burst protection for the free-preview endpoint. Each preview
+ * costs ~$0.04 of Replicate credits, so one viral post without a limiter can
+ * drain the account via curious lurkers or bots. This is an in-memory window
+ * (per serverless instance) — not a perfect distributed limiter, but it stops
+ * the burst that matters. If abuse persists, move to Vercel KV or a WAF rule.
+ */
+const PREVIEWS_PER_IP = 5
+const PREVIEW_WINDOW_MS = 24 * 60 * 60 * 1000
+const previewHits = new Map<string, { count: number; resetAt: number }>()
+
+function isPreviewLimited(ip: string): boolean {
+  const now = Date.now()
+  const rec = previewHits.get(ip)
+  if (!rec || now > rec.resetAt) {
+    // Prune stale entries occasionally so the map can't grow unbounded
+    if (previewHits.size > 10_000) {
+      previewHits.forEach((v, k) => {
+        if (now > v.resetAt) previewHits.delete(k)
+      })
+    }
+    previewHits.set(ip, { count: 1, resetAt: now + PREVIEW_WINDOW_MS })
+    return false
+  }
+  rec.count += 1
+  return rec.count > PREVIEWS_PER_IP
+}
+
+/**
  * Host the customer's photo on Replicate's file storage and return a short,
  * stable URL. We must NOT feed the raw data URI straight into the prediction:
  * Replicate truncates large input values when a prediction is read back, so
@@ -48,6 +76,18 @@ async function hostPhoto(dataUri: string): Promise<string> {
 // webhook recovers it after payment.
 export async function POST(req: NextRequest) {
   try {
+    // Per-IP rate limit: 5 free previews per 24h per IP (burst protection)
+    const ip =
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      req.headers.get('x-real-ip') ||
+      'unknown'
+    if (isPreviewLimited(ip)) {
+      return NextResponse.json(
+        { error: 'You have reached the free preview limit. Please try again tomorrow.' },
+        { status: 429 }
+      )
+    }
+
     const { fileUrls, email, style } = await req.json()
 
     if (!Array.isArray(fileUrls) || fileUrls.length === 0 || !email) {

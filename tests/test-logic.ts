@@ -73,10 +73,10 @@ const IMGS = ['data:image/jpeg;base64,AAA1', 'data:image/jpeg;base64,AAA2', 'dat
 async function main() {
   // ---------- buildHeadshotInput / normalizeOutput ----------
   console.log('\nbuildHeadshotInput:')
-  const inp = buildHeadshotInput(IMGS[0], 0)
+  const inp = buildHeadshotInput(IMGS[0], 'linkedin')
   check('uses the source photo', inp.input_image === IMGS[0])
   check('prompt demands identity preservation', String(inp.prompt).includes('identity'))
-  check('prompt index wraps safely', String(buildHeadshotInput(IMGS[0], 7).prompt).length > 0)
+  check('any valid style yields a prompt', String(buildHeadshotInput(IMGS[0], 'academic').prompt).length > 0)
   check('normalizes string output', normalizeOutput('https://x/a.jpg').length === 1)
   check('normalizes array output', normalizeOutput(['https://x/a.jpg', 'https://x/b.jpg']).length === 2)
 
@@ -87,7 +87,7 @@ async function main() {
   check('returns exactly 30 images', out30.length === 30, `got ${out30.length}`)
   check('creates exactly 30 predictions (1 image each)', created.length === 30, `got ${created.length}`)
   const styles30 = new Set(created.map((c) => c.prompt))
-  check('cycles 5 distinct styles', styles30.size === 5, `got ${styles30.size}`)
+  check('single chosen style across the set', styles30.size === 1, `got ${styles30.size}`)
   check('every job uses the source photo', created.every((c) => c.input.input_image === IMGS[0]))
 
   // ---------- standard tier: 15 images ----------
@@ -95,7 +95,7 @@ async function main() {
   created.length = 0
   const out15 = await generateHeadshots(IMGS, TIERS.standard.count)
   check('returns exactly 15 images', out15.length === 15, `got ${out15.length}`)
-  check('cycles 3 distinct styles', new Set(created.map((c) => c.prompt)).size === 3)
+  check('single chosen style across the set', new Set(created.map((c) => c.prompt)).size === 1)
 
   // ---------- basic tier: 1 image ----------
   console.log('\ngenerateHeadshots basic (1):')

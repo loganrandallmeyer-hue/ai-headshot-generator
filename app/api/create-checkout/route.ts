@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     apiVersion: '2023-10-16',
   })
   try {
-    const { email, sessionId, tier, predictionId, style } = await req.json()
+    const { email, sessionId, tier, predictionId, style, marketingConsent } = await req.json()
 
     if (!email || !sessionId || !tier || !predictionId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -91,6 +91,9 @@ export async function POST(req: NextRequest) {
         prediction_id: predictionId,
         photo_url: photoUrl,
         style: selectedStyle,
+        // Marketing-email consent captured at upload (true/false) — visible in
+        // the Stripe dashboard for later list building. Never email without it.
+        marketing_consent: marketingConsent === true ? 'true' : 'false',
       },
       expires_at: Math.floor(Date.now() / 1000) + 31 * 60, // Stripe minimum is 30 min
       success_url: `${baseUrl}/success?email=${encodeURIComponent(email)}&session_id=${sessionId}&tier=${tier}`,

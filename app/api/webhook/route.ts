@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { generateHeadshots, getInputImagesFromPrediction, TIERS, Tier, isValidStyle, DEFAULT_STYLE } from '@/lib/replicate'
-import { sendHeadshotsEmail } from '@/lib/email'
+import { sendHeadshotsEmail, sendRecoveryEmail } from '@/lib/email'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300 // parallel AI generation + email, worst case ~2-3 min
@@ -39,6 +39,19 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('Webhook signature verification failed:', err)
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+  }
+
+  // Abandoned checkout → gentle recovery email (photos only held 24h).
+  // Best-effort: a failed recovery send must not fail the webhook ack.
+  if (event.type === 'checkout.session.expired') {
+    const session = event.data.object as Stripe.Checkout.Session
+    const email = session.customer_email || session.metadata?.email
+    if (email) {
+      sendRecoveryEmail(email)
+        .then(() => console.log(`Recovery email sent to ${email}`))
+        .catch((err) => console.error('Recovery email failed:', err))
+    }
+    return NextResponse.json({ received: true })
   }
 
   if (event.type !== 'checkout.session.completed') {

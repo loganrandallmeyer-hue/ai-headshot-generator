@@ -13,7 +13,10 @@ function SuccessContent() {
   const [copied, setCopied] = useState(false)
 
   const handleShare = async () => {
-    const url = typeof window !== 'undefined' ? window.location.origin : 'https://snapshotai.app'
+    // UTM-tagged so every referral share is attributable in analytics
+    const url =
+      (typeof window !== 'undefined' ? window.location.origin : 'https://snapshotai.pinelightlabs.com') +
+      '/?utm_source=referral&utm_medium=share'
     try {
       if (navigator.share) {
         await navigator.share({ title: 'SnapShot AI', text: 'Professional AI headshots with a free preview', url })

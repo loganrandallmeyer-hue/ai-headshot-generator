@@ -20,6 +20,8 @@ export default function UploadPage() {
   const [photos, setPhotos] = useState<PhotoItem[]>([])
   const [selectedStyle, setSelectedStyle] = useState<StyleId>(DEFAULT_STYLE)
   const [email, setEmail] = useState('')
+  const [marketingConsent, setMarketingConsent] = useState(false)
+  const [heicTip, setHeicTip] = useState('')
   const [loading, setLoading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [statusMsg, setStatusMsg] = useState('')
@@ -46,6 +48,13 @@ export default function UploadPage() {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
+    onDropRejected: (rejections) => {
+      // iPhone HEIC files aren't in the accept list — catch them and help
+      const heic = rejections.find((r) => /\.heic$|\.heif$/i.test(r.file.name))
+      if (heic) {
+        setHeicTip('These look like iPhone photos (HEIC). Save them as JPEG first: Photos app → select photo → Share → Export → JPEG. Then upload again.')
+      }
+    },
     accept: { 'image/*': ['.jpg', '.jpeg', '.png', '.webp'] },
     maxSize: 20 * 1024 * 1024,
   })
@@ -119,10 +128,17 @@ export default function UploadPage() {
       setStatusMsg('Starting AI generation...')
       setUploadProgress(50)
 
+      // Stash the source photo so the preview page can show a before/after comparison
+      try {
+        if (fileUrls[0]) sessionStorage.setItem('sa_source_photo', fileUrls[0])
+      } catch {
+        /* storage full or blocked — preview page simply shows the single sample */
+      }
+
       const previewRes = await fetch('/api/generate-preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileUrls, email, style: selectedStyle }),
+        body: JSON.stringify({ fileUrls, email, style: selectedStyle, marketingConsent }),
       })
       if (!previewRes.ok) {
         const data = await previewRes.json().catch(() => ({}))
@@ -174,6 +190,7 @@ export default function UploadPage() {
         preview_url: encodeURIComponent(previewUrl),
         style: selectedStyle,
       })
+      if (marketingConsent) params.set('consent', '1')
       window.location.href = `/preview?${params.toString()}`
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
@@ -316,6 +333,12 @@ export default function UploadPage() {
           </span>
         </div>
 
+        {heicTip && (
+          <div role="status" className="mb-6 px-4 py-3 rounded-xl border border-gold/40 bg-gold/5">
+            <p className="font-body text-xs text-gold leading-relaxed">{heicTip}</p>
+          </div>
+        )}
+
         {photos.length > 0 && (
           <div className="flex items-center justify-between mb-4">
             <span className="font-body text-sm text-cream-muted">
@@ -360,6 +383,18 @@ export default function UploadPage() {
             className="w-full px-4 py-3 rounded-xl border border-border bg-charcoal/60 text-cream font-body text-sm placeholder-cream-muted/40 focus:outline-none focus:border-gold transition-colors"
           />
         </div>
+
+        <label className="flex items-start gap-3 mb-6 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={marketingConsent}
+            onChange={(e) => setMarketingConsent(e.target.checked)}
+            className="mt-0.5 w-4 h-4 rounded accent-[#C9A550]"
+          />
+          <span className="font-body text-xs text-cream-muted leading-relaxed">
+            Yes — email me a 20% launch code and occasional updates. (No spam; unsubscribe anytime.)
+          </span>
+        </label>
 
         {error && (
           <div role="alert" className="mb-6 px-4 py-3 rounded-xl border border-red-800 bg-red-900/20">

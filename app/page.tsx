@@ -8,6 +8,11 @@ import SiteFooter from '../components/SiteFooter'
 import StickyBuyBar from '../components/StickyBuyBar'
 import FAQ from '../components/FAQ'
 import Showcase from '../components/Showcase'
+import Testimonials, { type Testimonial } from '../components/Testimonials'
+
+// Add real buyer reviews here as they arrive — the section appears automatically.
+// Keep them honest: first name + their words (+ optional role). Never fake these.
+const TESTIMONIALS: Testimonial[] = []
 
 const TRUST_POINTS = [
   {
@@ -117,7 +122,7 @@ const FAQS = [
   },
   {
     q: 'What if I am not happy with the results?',
-    a: 'That is exactly why we show you a watermarked preview before you pay — you only purchase once you have seen the quality of your own results. If something goes wrong with your order, contact us and we will make it right.',
+    a: 'That is exactly why we show you a watermarked preview before you pay — you only purchase once you have seen the quality of your own results. And every paid order is covered by our 48-hour money-back guarantee: if anything goes wrong, we fix it or refund you in full, no questions asked.',
   },
 ]
 
@@ -136,7 +141,7 @@ export default function LandingPage() {
           <div className="text-center lg:text-left">
             <div className="animate-fade-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 mb-8">
               <span className="w-1.5 h-1.5 rounded-full bg-gold pulse-soft" />
-              <span className="font-body text-xs text-gold tracking-widest uppercase">Free preview · Delivered in 30 minutes</span>
+              <span className="font-body text-xs text-gold tracking-widest uppercase">Free preview · 30 min delivery · LAUNCH20 = 20% off</span>
             </div>
 
             <h1 className="animate-fade-up delay-100 font-display t-display font-light mb-6">
@@ -175,7 +180,7 @@ export default function LandingPage() {
           </div>
 
           {/* Before/after showcase — real transformation example, offset to overlap the copy column at lg+ */}
-          <div className="animate-fade-up delay-300 relative hidden lg:block lg:mt-16 lg:-ml-6 z-10">
+          <div className="animate-fade-up delay-300 relative mt-10 lg:mt-16 lg:-ml-6 z-10">
             <Showcase
               beforeSrc="/showcase/before-1.jpg"
               afterSrc="/showcase/after-1.jpg"
@@ -214,6 +219,9 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+      {/* SOCIAL PROOF — appears automatically once real testimonials exist */}
+      <Testimonials items={TESTIMONIALS} />
 
       {/* HOW IT WORKS */}
       <section id="how-it-works" className="px-6 section-py-xl max-w-5xl mx-auto scroll-mt-20">
@@ -391,6 +399,9 @@ export default function LandingPage() {
           <p className="font-body text-xs text-cream-muted text-center mt-6">
             Payments secured by Stripe · You always see a watermarked preview before paying
           </p>
+          <p className="font-body text-xs text-cream-muted text-center mt-2">
+            Launch week: use code <span className="text-gold font-medium">LAUNCH20</span> for 20% off · 48-hour money-back guarantee
+          </p>
         </div>
       </section>
 
@@ -409,6 +420,9 @@ export default function LandingPage() {
               <h2 className="font-display t-h2 font-light text-cream mb-4">Our whole model is the guarantee</h2>
               <p className="font-body text-base text-cream-muted max-w-2xl mx-auto leading-relaxed">
                 You never pay to find out if it worked. We generate a real preview from your own photo, watermarked, for free — and you decide from there. No surprises, no risk, no reason to hesitate.
+              </p>
+              <p className="font-body text-base text-cream max-w-2xl mx-auto leading-relaxed mt-4">
+                And every paid order is covered by our <span className="text-gold">48-hour money-back guarantee</span> — if anything goes wrong, we fix it or refund you in full, no questions asked.
               </p>
             </div>
           </div>
